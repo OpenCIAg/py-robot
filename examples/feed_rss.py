@@ -2,10 +2,9 @@ import json
 
 import aiohttp
 
-from core import CollectorFactory
-from core import Robot
+from robot.core import CollectorFactory
+from robot.core import Robot
 
-url = 'https://patentscope.wipo.int/search/rss.jsf?query=FP%3A%28sprayer%29&office=&rss=true&sortOption=Pub+Date+Desc'
 url = 'https://elvisfusco.com.br/feed/'
 
 collector_factory = CollectorFactory()
