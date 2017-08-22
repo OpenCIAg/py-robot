@@ -1,5 +1,4 @@
 import os
-from pip.req import parse_requirements
 from setuptools import setup, find_packages
 
 from robot import __version__
@@ -10,7 +9,8 @@ def read(file_name):
         return f.read()
 
 
-requirements = read('requirements.txt').splitlines()
+requirements = filter(None, read('requirements.txt').splitlines())
+requirements_dev = filter(None, read('requirements-dev.txt').splitlines())
 str_version = '.'.join(map(str, __version__))
 
 setup(
@@ -32,6 +32,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Development Status :: 3 - Alpha',
     ],
-    install_requires=parse_requirements('requirements.txt'),
-    tests_require=parse_requirements('requirements-dev.txt'),
+    install_requires=requirements,
+    tests_require=requirements_dev,
 )

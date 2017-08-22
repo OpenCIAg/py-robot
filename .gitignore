@@ -2,4 +2,7 @@
 *.py[cod]
 __pycache__/**
 /venv*/
+**.egg-info/
+/build
+/dist
 !.gitignore
