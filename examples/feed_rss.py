@@ -2,8 +2,8 @@ import json
 
 import aiohttp
 
-from robot.core import CollectorFactory
-from robot.core import Robot
+from robot import CollectorFactory
+from robot import Robot
 
 url = 'https://elvisfusco.com.br/feed/'
 
