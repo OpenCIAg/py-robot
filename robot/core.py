@@ -28,13 +28,13 @@ class AttrCollector(object):
 
 
 class ObjectCollector(object):
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.collectors = kwargs
 
     async def __call__(self, item, robot) -> dict:
         obj = dict()
-        for attr_name, attr_collector in self.collectors.items():
-            obj[attr_name] = await attr_collector(item, robot)
+        for attr_name, collector in self.collectors.items():
+            obj[attr_name] = await collector(item, robot)
         return obj
 
 
@@ -68,17 +68,17 @@ class CollectorFactory(object):
     obj_class = ObjectCollector
     remote_class = RemoteCollector
 
-    def array(self, selector, collector=None):
-        return self.array_class(selector, collector)
+    def array(self, *args, **kwargs):
+        return self.array_class(*args, **kwargs)
 
-    def attr(self, selector):
-        return self.attr_class(selector)
+    def attr(self, *args, **kwargs):
+        return self.attr_class(*args, **kwargs)
 
-    def obj(self, **kwargs):
-        return self.obj_class(**kwargs)
+    def obj(self, *args, **kwargs):
+        return self.obj_class(*args, **kwargs)
 
-    def remote(self, selector, collector):
-        return self.remote_class(selector, collector)
+    def remote(self, *args, **kwargs):
+        return self.remote_class(*args, **kwargs)
 
 
 class Robot(object):
