@@ -2,6 +2,7 @@ import asyncio
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
 
+import re
 from pyquery import PyQuery as pq
 
 xml_engine = pq
@@ -13,18 +14,52 @@ class NoopCollector(object):
 
 
 class AttrCollector(object):
-    def __init__(self, selector, post_process=None, type=str):
+    def __init__(self, selector, attr=None,
+                 post_process=None,
+                 regex=None,
+                 type=None):
         self.selector = selector
         self.type = type
+        self.attr = attr
+        self.regex = regex
         if post_process:
-            setattr(self, post_process)
+            setattr(self, 'post_process', post_process)
+
+    def _regex_process(self, pre_result):
+        if not self.regex:
+            return pre_result
+        match = self.regex.search(pre_result)
+        if not match:
+            return None
+        d = match.groupdict()
+        if d:
+            return d
+        l = match.groups()
+        if len(l) > 1:
+            return l
+        elif l:
+            return l[0]
+        return match.group(0)
+
+    def _type_process(self, pre_result):
+        if not self.type:
+            return pre_result
+        return self.type(pre_result)
+
+    def _attr_process(self, pre_result):
+        if not self.attr:
+            return pre_result.text()
+        return pre_result.attr(self.attr)
 
     def post_process(self, e):
-        return self.type(e.text())
+        result = self._attr_process(e)
+        result = self._regex_process(result)
+        result = self._type_process(result)
+        return result
 
     async def __call__(self, item, robot) -> any:
-        result = item.find(self.selector)
-        return self.post_process(xml_engine(result))
+        el = xml_engine(item.find(self.selector))
+        return self.post_process(el)
 
 
 class ObjectCollector(object):
@@ -100,8 +135,6 @@ class Robot(object):
         try:
             result = await self.collector(document, self)
             return result
-        except Exception as ex:
-            print(ex)
         finally:
             self.session.close()
 
