@@ -2,7 +2,6 @@ import asyncio
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
 
-import re
 from pyquery import PyQuery as pq
 
 xml_engine = pq
@@ -14,7 +13,8 @@ class NoopCollector(object):
 
 
 class AttrCollector(object):
-    def __init__(self, selector, attr=None,
+    def __init__(self, selector=None,
+                 attr=None,
                  post_process=None,
                  regex=None,
                  type=None):
@@ -58,7 +58,10 @@ class AttrCollector(object):
         return result
 
     async def __call__(self, item, robot) -> any:
-        el = xml_engine(item.find(self.selector))
+        if self.selector:
+            el = item.find(self.selector)
+        else:
+            el = item
         return self.post_process(el)
 
 

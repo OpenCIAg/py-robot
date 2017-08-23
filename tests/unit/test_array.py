@@ -42,3 +42,12 @@ class ArrayCollectorTest(TestCase):
         expected = ['a', 'b', 'c', 'd']
         result = self.loop.run_until_complete(collector(html, None))
         self.assertEqual(expected, result)
+
+    def test_from_table_to_array_with_type(self):
+        collector = self.cf.array(
+            'li', self.cf.attr(type=int)
+        )
+        html = xml_engine('<ul><li>1</li><li>2</li><li>3</li><li>4</li></ul>')
+        expected = [1, 2, 3, 4]
+        result = self.loop.run_until_complete(collector(html, None))
+        self.assertEqual(expected, result)
