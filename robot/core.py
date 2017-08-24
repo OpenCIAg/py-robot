@@ -13,78 +13,129 @@ class NoopCollector(object):
         return item.text()
 
 
-class AttrCollector(object):
-    def __init__(self, selector=None,
-                 attr=None,
-                 post_process=None,
-                 regex=None, regex_filter=None,
-                 type=None):
-        self.selector = selector
-        self.type = type
-        self.attr = attr
-        self.regex = regex
-        self.regex_filter = regex_filter
-        if post_process:
-            setattr(self, 'post_process', post_process)
+def noop(e):
+    return e
 
-    def _regex_process(self, pre_result):
-        if not self.regex or not pre_result:
-            return pre_result
-        match = self.regex.search(pre_result)
-        if not match:
-            return None
-        d = match.groupdict()
-        if d:
-            return d
-        l = match.groups()
-        if len(l) > 1:
-            return l
-        elif l:
-            return l[0]
-        return match.group(0)
 
-    def _type_process(self, pre_result):
-        if not self.type or not pre_result:
-            return pre_result
-        return self.type(pre_result)
+def to_text(e):
+    return e.text()
 
-    def _attr_process(self, pre_result):
-        if not pre_result:
-            return pre_result
-        if not self.attr:
-            return pre_result.text()
-        return pre_result.attr(self.attr)
 
-    def _regex_filter_process(self, pre_result):
-        if not self.regex_filter or not pre_result:
-            return pre_result
-        for e in pre_result:
-            e = xml_engine(e)
-            if self.regex_filter.search(e.text()):
-                return e
-        return None
+class CompositeCollector(object):
+    def __init__(self, *actions):
+        self.actions = actions
 
-    def post_process(self, e):
-        result = self._regex_filter_process(e)
-        result = self._attr_process(result)
-        result = self._regex_process(result)
-        result = self._type_process(result)
+    async def __call__(self, e, robot):
+        result = e
+        for action in self.actions:
+            if not result:
+                return result
+            result = action(result)
         return result
 
-    async def __call__(self, item, robot) -> any:
-        if self.selector:
-            el = item.find(self.selector)
-        else:
-            el = item
-        return self.post_process(el)
+
+class CollectorBuilder(object):
+    def __init__(self):
+        self.actions = []
+
+    def regex(self, regex):
+
+        def _regex(pre_result):
+            match = regex.search(pre_result)
+            if not match:
+                return None
+            d = match.groupdict()
+            if d:
+                return d
+            l = match.groups()
+            if len(l) > 1:
+                return l
+            elif l:
+                return l[0]
+            return match.group(0)
+
+        self.actions.append(_regex)
+        return self
+
+    def regex_filter(self, regex):
+        def _regex_filter(pre_result):
+            for e in pre_result:
+                e = xml_engine(e)
+                if regex.search(e.text()):
+                    return e
+            return None
+
+        self.actions.append(_regex_filter)
+        return self
+
+    def selector(self, selector=None):
+        if not selector:
+            self.actions.append(noop)
+            return self
+
+        def _selector(pre_result):
+            return pre_result.find(selector) or None
+
+        self.actions.append(_selector)
+        return self
+
+    def call(self, func):
+        def _call(pre_result):
+            return func(pre_result)
+
+        self.actions.append(_call)
+        return self
+
+    def type(self, clazz):
+        return self.call(clazz)
+
+    def attr(self, attr=None):
+        if not attr:
+            self.actions.append(to_text)
+            return self
+
+        def _attr(pre_result):
+            return pre_result.attr(attr)
+
+        self.actions.append(_attr)
+        return self
+
+    def prefix(self, fragment):
+
+        def _prefix(e):
+            return fragment + e
+
+        self.actions.append(_prefix)
+        return self
+
+    def suffix(self, fragment):
+
+        def _suffix(e):
+            return e + fragment
+
+        self.actions.append(_suffix)
+        return self
+
+    def build(self):
+        return CompositeCollector(*self.actions)
 
 
 class ObjectCollector(object):
     def __init__(self, *args, **kwargs):
+        self.nested_collectors = args
         self.collectors = kwargs
 
     async def __call__(self, item, robot) -> dict:
         obj = dict()
+        for index, collector in enumerate(self.nested_collectors):
+            result = await collector(item, robot)
+            if not result:
+                continue
+            if isinstance(result, dict):
+                obj.update(result)
+            else:
+                key = 'arg_%d' % index
+                obj[key] = result
         for attr_name, collector in self.collectors.items():
             obj[attr_name] = await collector(item, robot)
         return obj
@@ -108,26 +159,34 @@ class RemoteCollector(object):
         self.collector = collector
 
     async def __call__(self, item, robot) -> any:
+        new_robot = robot.clone()
         url = item.find(self.selector).attr('href') or item.find(self.selector).text()
+        url = robot.prepare_url(url)
+        new_robot.first_url = urlparse(url)
         try:
             html = await robot.fetch(url)
             document = xml_engine(html.encode())
-            return await self.collector(document, robot)
+            return await self.collector(document, new_robot)
         except:
             return None
 
 
 class CollectorFactory(object):
+    collector_builder = CollectorBuilder
     array_class = ArrayCollector
-    attr_class = AttrCollector
     obj_class = ObjectCollector
     remote_class = RemoteCollector
 
     def array(self, *args, **kwargs):
         return self.array_class(*args, **kwargs)
 
-    def attr(self, *args, **kwargs):
-        return self.attr_class(*args, **kwargs)
+    def attr(self, selector=None, attr=None, **kwargs):
+        params = dict(**locals(), **kwargs)
+        keys = ['selector', 'regex_filter', 'attr', 'regex', 'prefix', 'suffix', 'type', 'call']
+        builder = self.collector_builder()
+        for k in [k for k in keys if k in params]:
+            getattr(builder, k)(params[k])
+        return builder.build()
 
     def obj(self, *args, **kwargs):
         return self.obj_class(*args, **kwargs)
@@ -145,9 +204,22 @@ class Robot(object):
         self.loop = None
         self.first_url = None
 
+    def clone(self):
+        robot = Robot(self.client, self.collector, self.timeout)
+        robot.session = self.session
+        robot.loop = self.loop
+        robot.first_url = self.first_url
+        return robot
+
+    def prepare_url(self, url: str):
+        if '://' not in url:
+            if not url.startswith('/'):
+                url = '/' + url
+            return self.first_url.scheme + '://' + self.first_url.netloc + url
+        return url
+
     async def fetch(self, url: str):
-        if url.startswith('/'):
-            url = self.first_url.scheme + '://' + self.first_url.netloc + url
+        url = self.prepare_url(url)
         async with self.session.get(url) as response:
             return await response.text()
 
@@ -162,12 +234,15 @@ class Robot(object):
         finally:
             self.session.close()
 
-    def run(self, url):
+    def run_many(self, *urls):
         cpu_count = multiprocessing.cpu_count()
         thread_pool = ThreadPoolExecutor(cpu_count)
 
         with thread_pool:
             self.loop = asyncio.get_event_loop()
             self.loop.set_default_executor(thread_pool)
-            result = self.loop.run_until_complete(self(url))
+            result = self.loop.run_until_complete(asyncio.gather(*[self.clone()(url) for url in urls]))
             return result
+
+    def run(self, url):
+        return self.run_many(url)[0]
