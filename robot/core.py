@@ -17,12 +17,13 @@ class AttrCollector(object):
     def __init__(self, selector=None,
                  attr=None,
                  post_process=None,
-                 regex=None,
+                 regex=None, regex_filter=None,
                  type=None):
         self.selector = selector
         self.type = type
         self.attr = attr
         self.regex = regex
+        self.regex_filter = regex_filter
         if post_process:
             setattr(self, 'post_process', post_process)
 
@@ -52,8 +53,18 @@ class AttrCollector(object):
             return pre_result.text()
         return pre_result.attr(self.attr)
 
+    def _regex_filter_process(self, pre_result):
+        if not self.regex_filter:
+            return pre_result
+        for e in pre_result:
+            e = xml_engine(e)
+            if self.regex_filter.search(e.text()):
+                return e
+        return None
+
     def post_process(self, e):
-        result = self._attr_process(e)
+        result = self._regex_filter_process(e)
+        result = self._attr_process(result)
         result = self._regex_process(result)
         result = self._type_process(result)
         return result

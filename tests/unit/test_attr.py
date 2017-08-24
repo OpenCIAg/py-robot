@@ -47,3 +47,11 @@ class AttributeCollectorTest(TestCase):
         expected = dict(key="User", value="username")
         result = self.loop.run_until_complete(collector(html, None))
         self.assertEqual(expected, result)
+
+    def test_with_reefx_filter(self):
+        collector = self.cf.attr('tr', regex_filter=re.compile(r'user:', re.IGNORECASE),
+                                 regex=re.compile(r'user: *(.*)'))
+        html = xml_engine('<table><tr><td>user:</td><td>username</td></tr><tr><td>age:</td><td>24</td></tr></table>')
+        expected = 'username'
+        result = self.loop.run_until_complete(collector(html, None))
+        self.assertEqual(expected, result)
