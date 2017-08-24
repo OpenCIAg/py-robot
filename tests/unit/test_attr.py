@@ -48,10 +48,18 @@ class AttributeCollectorTest(TestCase):
         result = self.loop.run_until_complete(collector(html, None))
         self.assertEqual(expected, result)
 
-    def test_with_reefx_filter(self):
+    def test_with_regex_filter(self):
         collector = self.cf.attr('tr', regex_filter=re.compile(r'user:', re.IGNORECASE),
                                  regex=re.compile(r'user: *(.*)'))
         html = xml_engine('<table><tr><td>user:</td><td>username</td></tr><tr><td>age:</td><td>24</td></tr></table>')
         expected = 'username'
+        result = self.loop.run_until_complete(collector(html, None))
+        self.assertEqual(expected, result)
+
+    def test_with_regex_filter_not_match(self):
+        collector = self.cf.attr('tr', regex_filter=re.compile(r'otherfield:', re.IGNORECASE),
+                                 regex=re.compile(r'otherfield: *(.*)'))
+        html = xml_engine('<table><tr><td>user:</td><td>username</td></tr><tr><td>age:</td><td>24</td></tr></table>')
+        expected = None
         result = self.loop.run_until_complete(collector(html, None))
         self.assertEqual(expected, result)

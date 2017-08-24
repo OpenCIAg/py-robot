@@ -28,7 +28,7 @@ class AttrCollector(object):
             setattr(self, 'post_process', post_process)
 
     def _regex_process(self, pre_result):
-        if not self.regex:
+        if not self.regex or not pre_result:
             return pre_result
         match = self.regex.search(pre_result)
         if not match:
@@ -44,17 +44,19 @@ class AttrCollector(object):
         return match.group(0)
 
     def _type_process(self, pre_result):
-        if not self.type:
+        if not self.type or not pre_result:
             return pre_result
         return self.type(pre_result)
 
     def _attr_process(self, pre_result):
+        if not pre_result:
+            return pre_result
         if not self.attr:
             return pre_result.text()
         return pre_result.attr(self.attr)
 
     def _regex_filter_process(self, pre_result):
-        if not self.regex_filter:
+        if not self.regex_filter or not pre_result:
             return pre_result
         for e in pre_result:
             e = xml_engine(e)
