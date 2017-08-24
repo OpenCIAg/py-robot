@@ -95,10 +95,13 @@ class RemoteCollector(object):
         self.collector = collector
 
     async def __call__(self, item, robot) -> any:
-        url = item.find(self.selector).text()
-        html = await robot.fetch(url)
-        document = xml_engine(html.encode())
-        return await self.collector(document, robot)
+        url = item.find(self.selector).attr('href') or item.find(self.selector).text()
+        try:
+            html = await robot.fetch(url)
+            document = xml_engine(html.encode())
+            return await self.collector(document, robot)
+        except:
+            return None
 
 
 class CollectorFactory(object):
