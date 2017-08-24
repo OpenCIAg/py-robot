@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 import asyncio
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
@@ -126,12 +127,16 @@ class Robot(object):
         self.collector = collector
         self.session = None
         self.loop = None
+        self.first_url = None
 
-    async def fetch(self, url):
+    async def fetch(self, url: str):
+        if url.startswith('/'):
+            url = self.first_url.scheme + '://' + self.first_url.netloc + url
         async with self.session.get(url) as response:
             return await response.text()
 
     async def __call__(self, url):
+        self.first_url = urlparse(url)
         self.session = self.client.ClientSession()
         html = await self.fetch(url)
         document = xml_engine(html.encode())
