@@ -21,6 +21,10 @@ def to_text(e):
     return e.text()
 
 
+def href_or_text(e):
+    return e.attr('href') or e.text()
+
+
 class CompositeCollector(object):
     def __init__(self, *actions):
         self.actions = actions
@@ -155,12 +159,17 @@ class ArrayCollector(object):
 
 class RemoteCollector(object):
     def __init__(self, selector, collector):
-        self.selector = selector
+        if hasattr(selector, '__call__'):
+            self.selector = selector
+        else:
+            self.selector = CollectorBuilder().selector(selector).call(href_or_text).build()
         self.collector = collector
 
     async def __call__(self, item, robot) -> any:
         new_robot = robot.clone()
-        url = item.find(self.selector).attr('href') or item.find(self.selector).text()
+        url = await self.selector(item, robot)
+        if not url:
+            return None
         url = robot.prepare_url(url)
         new_robot.first_url = urlparse(url)
         try:
