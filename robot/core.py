@@ -248,7 +248,7 @@ class Robot(object):
         self.first_url = urlparse(url)
         self.session = self.client.ClientSession()
         html = await self.fetch(url)
-        document = xml_engine(html.encode())
+        document = xml_engine(html)
         try:
             result = await self.collector(document, self)
             return result
