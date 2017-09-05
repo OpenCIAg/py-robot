@@ -182,7 +182,7 @@ class RemoteCollector(object):
         new_robot.first_url = urlparse(url)
         try:
             html = await robot.fetch(url)
-            document = xml_engine(html.encode())
+            document = xml_engine(html)
             return await self.collector(document, new_robot)
         except:
             return None
