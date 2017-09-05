@@ -12,6 +12,14 @@ class NoopCollector(object):
     async def __call__(self, item, robot):
         return item.text()
 
+class ConstCollector(object):
+    def __init__(self, const):
+        self.const = const
+
+    async def __call__(self, item, robot):
+        return self.const
+
+
 
 def noop(e):
     return e
@@ -185,6 +193,7 @@ class CollectorFactory(object):
     array_class = ArrayCollector
     obj_class = ObjectCollector
     remote_class = RemoteCollector
+    const_collector = ConstCollector
 
     def array(self, *args, **kwargs):
         return self.array_class(*args, **kwargs)
@@ -202,6 +211,9 @@ class CollectorFactory(object):
 
     def remote(self, *args, **kwargs):
         return self.remote_class(*args, **kwargs)
+
+    def const(self,const):
+        return self.const_collector(const)
 
 
 class Robot(object):
