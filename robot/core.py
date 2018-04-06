@@ -1,7 +1,7 @@
-from urllib.parse import urlparse
 import asyncio
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
+from urllib.parse import urlparse
 
 from pyquery import PyQuery as pq
 
@@ -12,13 +12,13 @@ class NoopCollector(object):
     async def __call__(self, item, robot):
         return item.text()
 
+
 class ConstCollector(object):
     def __init__(self, const):
         self.const = const
 
     async def __call__(self, item, robot):
         return self.const
-
 
 
 def noop(e):
@@ -81,12 +81,26 @@ class CollectorBuilder(object):
         return self
 
     def selector(self, selector=None):
+        return self.css(selector)
+
+    def css(self, selector=None):
         if not selector:
             self.actions.append(noop)
             return self
 
         def _selector(pre_result):
             return pre_result.find(selector) or None
+
+        self.actions.append(_selector)
+        return self
+
+    def xpath(self, selector):
+        if not selector:
+            self.actions.append(noop)
+            return self
+
+        def _selector(pre_result):
+            return xml_engine(pre_result.root.find(selector)) or None
 
         self.actions.append(_selector)
         return self
@@ -170,7 +184,7 @@ class RemoteCollector(object):
         if hasattr(selector, '__call__'):
             self.selector = selector
         else:
-            self.selector = CollectorBuilder().selector(selector).call(href_or_text).build()
+            self.selector = CollectorBuilder().css_selector(selector).call(href_or_text).build()
         self.collector = collector
 
     async def __call__(self, item, robot) -> any:
@@ -200,7 +214,18 @@ class CollectorFactory(object):
 
     def attr(self, selector=None, attr=None, **kwargs):
         params = dict(**locals(), **kwargs)
-        keys = ['selector', 'regex_filter', 'attr', 'regex', 'prefix', 'suffix', 'type', 'call']
+        keys = [
+            'selector',
+            'css',
+            'xpath',
+            'regex_filter',
+            'attr',
+            'regex',
+            'prefix',
+            'suffix',
+            'type',
+            'call'
+        ]
         builder = self.collector_builder()
         for k in [k for k in keys if k in params]:
             getattr(builder, k)(params[k])
@@ -212,7 +237,7 @@ class CollectorFactory(object):
     def remote(self, *args, **kwargs):
         return self.remote_class(*args, **kwargs)
 
-    def const(self,const):
+    def const(self, const):
         return self.const_collector(const)
 
 

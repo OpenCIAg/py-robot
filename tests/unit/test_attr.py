@@ -20,6 +20,13 @@ class AttributeCollectorTest(TestCase):
         result = self.loop.run_until_complete(collector(html, None))
         self.assertEqual(expected, result)
 
+    def test_xpath_from_div(self):
+        collector = self.cf.attr(xpath='//div[@class="title"]')
+        html = xml_engine('<div class="title">title content</div><div class="summary">summary content</div>')
+        expected = "title content"
+        result = self.loop.run_until_complete(collector(html, None))
+        self.assertEqual(expected, result)
+
     def test_with_regex(self):
         collector = self.cf.attr('div', regex=re.compile(r'user:[\W]*.+', re.IGNORECASE))
         html = xml_engine('<html><div>User:<p>username</p></div></html>')
