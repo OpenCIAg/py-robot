@@ -9,4 +9,4 @@ Instalação
 
 .. code-block:: shell
 
-    pip install git+http://git.ciag.org.br/ettore.tognoli/py-robot-core
+    pip install git+http://git.in.ciag.org.br/ciag/Libraries/py-robot-core.git
