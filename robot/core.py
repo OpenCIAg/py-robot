@@ -278,7 +278,7 @@ class Robot(object):
             result = await self.collector(document, self)
             return result
         finally:
-            self.session.close()
+            await self.session.close()
 
     def run_many(self, *urls):
         cpu_count = multiprocessing.cpu_count()
