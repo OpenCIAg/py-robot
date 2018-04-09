@@ -184,7 +184,7 @@ class RemoteCollector(object):
         if hasattr(selector, '__call__'):
             self.selector = selector
         else:
-            self.selector = CollectorBuilder().css_selector(selector).call(href_or_text).build()
+            self.selector = CollectorBuilder().css(selector).call(href_or_text).build()
         self.collector = collector
 
     async def __call__(self, item, robot) -> any:
