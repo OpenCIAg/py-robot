@@ -267,7 +267,7 @@ class Robot(object):
     async def fetch(self, url: str):
         url = self.prepare_url(url)
         async with self.session.get(url) as response:
-            return await response.text()
+            return await response.content.read()
 
     async def __call__(self, url):
         self.first_url = urlparse(url)
