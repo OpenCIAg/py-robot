@@ -8,6 +8,7 @@ from robot import Robot
 
 base_url = 'http://www.coopercitrus.com.br/'
 source = 'Coopercitrus'
+
 cf = CollectorFactory()
 collector = cf.array(
     '#coluna_esquerda table', cf.obj(
