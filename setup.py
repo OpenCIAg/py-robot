@@ -18,7 +18,7 @@ setup(
     name='ciag-robot',
     version=str_version,
     description='Python Library to Build Web Robots',
-    long_description=read('README.rst'),
+    long_description=read('README.md'),
     url='https://github.com/OpenCIAg/py-robot',
     download_url='https://github.com/OpenCIAg/py-robot/tree/%s/' % str_version,
     license='CLOSED',
