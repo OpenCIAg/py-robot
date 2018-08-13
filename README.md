@@ -5,8 +5,6 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/4116e2ba99ce56e1397e/maintainability)](https://codeclimate.com/github/OpenCIAg/py-robot/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/4116e2ba99ce56e1397e/test_coverage)](https://codeclimate.com/github/OpenCIAg/py-robot/test_coverage)
 
-.. image:: 
-    :target: 
 
 ## Instalação
 
