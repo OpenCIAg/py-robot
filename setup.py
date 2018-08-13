@@ -1,7 +1,8 @@
 import os
+
 from setuptools import setup, find_packages
 
-from robot import __version__
+__version__ = (0, 0, 1)
 
 
 def read(file_name):
@@ -14,19 +15,19 @@ requirements_dev = filter(None, read('requirements-dev.txt').splitlines())
 str_version = '.'.join(map(str, __version__))
 
 setup(
-    name='py-robot-core',
+    name='ciag-robot',
     version=str_version,
     description='Python Library to Build Web Robots',
     long_description=read('README.rst'),
-    url='http://http://git.ciag.org.br/ettore.tognoli/py-robot-core/',
-    download_url='http://git.ciag.org.br/ettore.tognoli/py-robot-core/tree/%s/' % str_version,
+    url='https://github.com/OpenCIAg/py-robot',
+    download_url='https://github.com/OpenCIAg/py-robot/tree/%s/' % str_version,
     license='CLOSED',
     author='Éttore Leandro Tognoli',
     author_email='ettore.tognoli@ciag.org.br',
     data_files=['requirements.txt'],
     packages=find_packages(exclude=['tests', 'examples']),
     include_package_data=True,
-    keywords=['Robot'],
+    keywords=['Robot', 'Web Crawler'],
     classifiers=[
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
