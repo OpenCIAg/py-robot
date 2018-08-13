@@ -30,3 +30,11 @@ clean:
 	rm -rf htmlcov/ coverage.xml .coverage
 	rm -rf dist/ build/
 	rm -rf *.egg-info
+
+public:
+	${PYTHON} setup.py register -r pypi
+	${PYTHON} setup.py sdist upload -r pypi
+
+public-test:
+	${PYTHON} setup.py register -r pypitest
+	${PYTHON} setup.py sdist upload -r pypitest
