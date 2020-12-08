@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup, find_packages
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 
 def read(file_name):
@@ -51,6 +51,6 @@ setup(
         'Programming Language :: Python :: 3',
         'Development Status :: 3 - Alpha',
     ],
-    install_requires=requirements,
-    tests_require=requirements_dev,
+    install_requires=list(requirements),
+    tests_require=list(requirements_dev),
 )
