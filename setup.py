@@ -11,9 +11,11 @@ def read(file_name):
 
 
 def read_requirements(file_name):
-    lines = filter(None, read(file_name).splitlines()[1:])
+    lines = filter(None, read(file_name).splitlines())
     for line in lines:
         if line.startswith('#'):
+            continue
+        if line.startswith('-'):
             continue
         if ';' in line:
             line, _ = line.split(';', 1)
