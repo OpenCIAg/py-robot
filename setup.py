@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup, find_packages
 
-__version__ = (0, 2, 0)
+__version__ = '0.2.0'
 
 
 def read(file_name):
@@ -10,17 +10,24 @@ def read(file_name):
         return f.read()
 
 
-requirements = filter(None, read('requirements.txt').splitlines())
-requirements_dev = filter(None, read('requirements-dev.txt').splitlines())
-str_version = '.'.join(map(str, __version__))
+def read_requirements(file_name):
+    lines = filter(None, read(file_name).splitlines()[1:])
+    for line in lines:
+        if ';' in line:
+            line, _ = line.split(';', 1)
+        yield line
+    
+
+requirements = read_requirements('requirements.txt')
+requirements_dev = read_requirements('requirements-dev.txt')
 
 setup(
     name='ciag-robot',
-    version=str_version,
+    version=__version__,
     description='Python Library to Build Web Robots',
     long_description=read('README.md'),
     url='https://github.com/OpenCIAg/py-robot',
-    download_url='https://github.com/OpenCIAg/py-robot/tree/%s/' % str_version,
+    download_url='https://github.com/OpenCIAg/py-robot/tree/%s/' % __version__,
     license='CLOSED',
     author='Éttore Leandro Tognoli',
     author_email='ettore.tognoli@ciag.org.br',
