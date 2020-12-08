@@ -24,8 +24,14 @@ setup(
     license='CLOSED',
     author='Éttore Leandro Tognoli',
     author_email='ettore.tognoli@ciag.org.br',
-    data_files=['requirements.txt'],
-    packages=find_packages(exclude=['tests', 'examples']),
+    data_files=[
+        'requirements.txt',
+        'requirements-dev.txt',
+    ],
+    packages=find_packages(
+        './src/main/python/',
+    ),
+    package_dir={'': 'src/main/python'},
     include_package_data=True,
     keywords=['Robot', 'Web Crawler'],
     classifiers=[

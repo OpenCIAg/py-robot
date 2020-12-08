@@ -1,7 +1,9 @@
 stages:
   - prepare
   - test
+  - publish
 
+image: python:3.7
 variables:
   PYTHONPATH: src/main/python/
   PIPENV_VENV_IN_PROJECT: "true"
@@ -16,7 +18,6 @@ before_script:
   - "[[ -d .venv ]] && source .venv/bin/activate"
 
 prepare-env:
-  image: python:3.7
   stage: prepare
   cache:
     <<: *python_cache
@@ -29,12 +30,10 @@ prepare-env:
   artifacts:
     paths:
       - requirements.txt
+      - requirements-dev.txt
 
 test:
-  image: python:3.7
   stage: test
-  cache:
-    <<: *python_cache
   script:
     - coverage run --source src/main/python -m unittest discover -s "src/test/python"
     - coverage xml
@@ -43,3 +42,13 @@ test:
     paths:
       - .coverage
       - coverage.xml
+
+publish:
+  only:
+    - tags
+  script:
+    - python setup.py sdist
+    - twine upload dist/*
+  artifacts:
+    paths:
+      - dist/
