@@ -13,10 +13,12 @@ def read(file_name):
 def read_requirements(file_name):
     lines = filter(None, read(file_name).splitlines()[1:])
     for line in lines:
+        if line.startswith('#'):
+            continue
         if ';' in line:
             line, _ = line.split(';', 1)
         yield line
-    
+
 
 requirements = read_requirements('requirements.txt')
 requirements_dev = read_requirements('requirements-dev.txt')
