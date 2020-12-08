@@ -25,8 +25,8 @@ prepare-env:
   script:
     - python -m pip install -U pip pipenv
     - pipenv install --dev
-    - pipenv lock -r > requirement.txt
-    - pipenv lock -dr > requirement-dev.txt
+    - pipenv lock -r > requirements.txt
+    - pipenv lock -dr > requirements-dev.txt
   artifacts:
     paths:
       - requirements.txt
