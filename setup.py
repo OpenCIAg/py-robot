@@ -30,6 +30,7 @@ setup(
     version=__version__,
     description='Python Library to Build Web Robots',
     long_description=read('README.md'),
+    long_description_content_type='text/markdown',
     url='https://github.com/OpenCIAg/py-robot',
     download_url='https://github.com/OpenCIAg/py-robot/tree/%s/' % __version__,
     license='CLOSED',
