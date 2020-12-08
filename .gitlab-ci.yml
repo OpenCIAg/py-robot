@@ -1,0 +1,45 @@
+stages:
+  - prepare
+  - test
+
+variables:
+  PYTHONPATH: src/main/python/
+  PIPENV_VENV_IN_PROJECT: "true"
+
+cache: &python_cache
+  key: venv
+  paths:
+    - .venv/
+  policy: pull
+
+before_script:
+  - "[[ -d .venv ]] && source .venv/bin/activate"
+
+prepare-env:
+  image: python:3.7
+  stage: prepare
+  cache:
+    <<: *python_cache
+    policy: pull-push
+  script:
+    - python -m pip install -U pip pipenv
+    - pipenv install --dev
+    - pipenv lock -r > requirement.txt
+    - pipenv lock -dr > requirement-dev.txt
+  artifacts:
+    paths:
+      - requirements.txt
+
+test:
+  image: python:3.7
+  stage: test
+  cache:
+    <<: *python_cache
+  script:
+    - coverage run --source src/main/python -m unittest discover -s "src/test/python"
+    - coverage xml
+    - coverage report
+  artifacts:
+    paths:
+      - .coverage
+      - coverage.xml
