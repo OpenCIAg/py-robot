@@ -43,7 +43,7 @@ test:
       - .coverage
       - coverage.xml
 
-release-snapshot:
+dev-release:
   stage: dist
   only:
     - master
