@@ -1,7 +1,7 @@
 stages:
   - prepare
   - test
-  - publish
+  - dist
 
 image: python:3.7
 variables:
@@ -43,11 +43,24 @@ test:
       - .coverage
       - coverage.xml
 
-publish:
-  stage: publish
+release-snapshot:
+  stage: dist
+  only:
+    - master
+  script:
+    - sed -i s'/SNAPSHOT/'\''${CI_COMMIT_TIMESTAMP}\'''/' setup.py
+    - python setup.py sdist
+    - twine upload dist/*
+  artifacts:
+    paths:
+      - dist/
+
+release:
+  stage: dist
   only:
     - tags
   script:
+    - sed -i s'/^__version__ = .*/__version__ = '\''${CI_COMMIT_REF_NAME}\'''/' setup.py
     - python setup.py sdist
     - twine upload dist/*
   artifacts:
