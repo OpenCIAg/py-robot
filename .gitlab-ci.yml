@@ -48,7 +48,7 @@ release-snapshot:
   only:
     - master
   script:
-    - sed -i s'/SNAPSHOT/'\''${CI_COMMIT_TIMESTAMP}\'''/' setup.py
+    - sed -i s'/SNAPSHOT/'\'${CI_COMMIT_TIMESTAMP}\''/' setup.py
     - python setup.py sdist
     - twine upload dist/*
   artifacts:
@@ -60,7 +60,7 @@ release:
   only:
     - tags
   script:
-    - sed -i s'/^__version__ = .*/__version__ = '\''${CI_COMMIT_REF_NAME}\'''/' setup.py
+    - sed -i s'/^__version__ = .*/__version__ = '\'${CI_COMMIT_REF_NAME}\''/' setup.py
     - python setup.py sdist
     - twine upload dist/*
   artifacts:
