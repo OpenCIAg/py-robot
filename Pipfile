@@ -7,11 +7,11 @@ verify_ssl = true
 coverage = "*"
 pylint = "*"
 aiounittest = "*"
+twine = "*"
 
 [packages]
 aiohttp = "*"
 pyquery = "*"
-twine = "*"
 
 [requires]
 python_version = "3.7"
