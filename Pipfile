@@ -5,6 +5,8 @@ verify_ssl = true
 
 [dev-packages]
 coverage = "*"
+pylint = "*"
+aiounittest = "*"
 
 [packages]
 aiohttp = "*"
@@ -13,3 +15,8 @@ twine = "*"
 
 [requires]
 python_version = "3.7"
+
+
+[scripts]
+test = "python -m unittest discover -s src/test/python"
+coverage = "coverage run --source src/main/python  python -m unittest discover -s src/test/python"
