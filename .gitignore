@@ -6,6 +6,7 @@ __pycache__/**
 /build
 /dist
 /htmlcov
+!.env
 !.travis.yml
 !.gitignore
 !.gitlab-ci.yml
