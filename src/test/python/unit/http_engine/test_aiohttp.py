@@ -41,5 +41,5 @@ class AioHttpEngineTest(AsyncTestCase):
             )
             url = server.url_for('/')
             async with http_engine.session() as session:
-                result = await session.get(url)
+                headers, result = await session.get(url)
                 self.assertEqual(h1_hello, result)

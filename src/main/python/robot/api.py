@@ -9,11 +9,11 @@ Y = TypeVar('Y')
 
 class HttpEngine():
 
-    def session(self) -> AsyncContextManager[HttpSession]:
+    def session(self) -> HttpSession:
         raise NotImplementedError()
 
 
-class HttpSession():
+class HttpSession(AsyncContextManager['HttpSession']):
 
     async def get(self, url):
         raise NotImplementedError()
@@ -52,7 +52,9 @@ class XmlEngine():
 class Context():
     xml_engine: XmlEngine
     http_engine: HttpEngine
-    http_session: HttpSession
+
+    def resolve_url(self, url: str) -> str:
+        raise NotImplementedError()
 
     async def http_get(self, url) -> Tuple[Context, XmlNode]:
         raise NotImplementedError()

@@ -1,7 +1,7 @@
 import aiohttp
 from typing import AsyncContextManager
 from robot.api import HttpSession, HttpEngine
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Tuple, Any
 
 T = TypeVar('T')
 
@@ -12,10 +12,10 @@ class AioHttpSessionAdapter(HttpSession):
     def __init__(self, client_session: aiohttp.ClientSession):
         self.client_session = client_session
 
-    async def get(self, url):
+    async def get(self, url) -> Tuple[Any, str]:
         async with self.client_session.get(url, allow_redirects=True) as response:
             content = await response.content.read()
-            return content.decode()
+            return response.headers, content.decode()
 
     async def __aenter__(self):
         return self
