@@ -1,15 +1,20 @@
 from __future__ import annotations
-from typing import List, Callable, Mapping, Any, Iterable
+
+from typing import List, Callable, Iterable, Iterator
 from typing import TypeVar, Generic
 
 I = TypeVar('I')
 O = TypeVar('O')
 
+
 class HttpEngine():
     pass
 
+
 class XmlNode(Iterable['XmlNode']):
-    
+
+    def __iter__(self) -> Iterator[XmlNode]:
+        raise NotImplementedError()
 
     def find_by_css(self, css: str) -> XmlNode:
         raise NotImplementedError()
@@ -30,47 +35,32 @@ class XmlNode(Iterable['XmlNode']):
         raise NotImplementedError()
 
 
-
 class XmlEngine():
 
-    def __call__(self, raw_xml : str) -> XmlNode:
+    def __call__(self, raw_xml: str) -> XmlNode:
         raise NotImplementedError()
-
 
 
 class Context():
-
-    xml_engine : XmlEngine
-    http_engine : HttpEngine
-
+    xml_engine: XmlEngine
+    http_engine: HttpEngine
 
 
-class Collector(Generic[I,O]):
-    
-    async def __call__(self, context: Context, item : I) -> O:
+class Collector(Generic[I, O]):
+
+    async def __call__(self, context: Context, item: I) -> O:
         raise NotImplementedError()
 
-
-class CollectorFactory():
-
-    def obj(self, **fields_collectors : Mapping[str, Collector[XmlNode, Any] ]) -> Collector[XmlNode, Any]:
-        raise NotImplementedError()
-
-    def field(self, fn: Callable[XmlNode, Any]) -> Collector[XmlNode, Any]:
-        raise NotImplementedError()
-
-    def array(self, fn: Callable[XmlNode, List[XmlNode]], collector: Collector[XmlNode, Any]) -> Collector[XmlNode, List[Any]]:
-        raise NotImplementedError()
 
 class Robot():
 
-    async def run(self, collector: Collector[XmlNode, O], url : str) -> O:
+    async def run(self, collector: Collector[XmlNode, O], url: str) -> O:
         raise NotImplementedError()
 
     async def run_many(self, collector: Collector[XmlNode, O], *url: List[str]) -> List[O]:
         raise NotImplementedError()
 
-    def sync_run(self, collector: Collector[XmlNode, O], url : str) -> O:
+    def sync_run(self, collector: Collector[XmlNode, O], url: str) -> O:
         raise NotImplementedError()
 
     def sync_run_many(self, collector: Collector[XmlNode, O], *url: List[str]) -> List[O]:

@@ -1,10 +1,7 @@
 from aiounittest import AsyncTestCase
-import asyncio
-import os
 
-from robot.xml_engine.pyquery_engine import PyQueryAdapter
-from robot import CollectorFactory
 from robot.collector.shortcut import *
+from robot.xml_engine.pyquery_engine import PyQueryAdapter
 
 
 class ArrayCollectorTest(AsyncTestCase):
