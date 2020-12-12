@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Callable, Iterable, Iterator
+from typing import List, Callable, Iterable, Iterator, Tuple
 from typing import TypeVar, Generic
 
 X = TypeVar('X')
@@ -8,7 +8,15 @@ Y = TypeVar('Y')
 
 
 class HttpEngine():
-    pass
+
+    def session(self) -> HttpSession:
+        raise NotImplementedError()
+
+
+class HttpSession():
+
+    async def get(self, url):
+        raise NotImplementedError()
 
 
 class XmlNode(Iterable['XmlNode']):
@@ -44,6 +52,10 @@ class XmlEngine():
 class Context():
     xml_engine: XmlEngine
     http_engine: HttpEngine
+    http_session: HttpSession
+
+    async def http_get(self, url) -> Tuple[Context, XmlNode]:
+        raise NotImplementedError()
 
 
 class Collector(Generic[X, Y]):

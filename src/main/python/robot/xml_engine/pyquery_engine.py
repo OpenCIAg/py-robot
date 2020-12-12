@@ -3,11 +3,11 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import Iterator, Iterable, Callable, List
+from typing import Iterator, Iterable
 
 from pyquery import PyQuery
 
-from robot.api import XmlEngine, XmlNode, Y
+from robot.api import XmlEngine, XmlNode
 
 __logger__ = logging.getLogger(__name__)
 

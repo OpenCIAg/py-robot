@@ -19,6 +19,7 @@ any = core.AnyCollector
 default = core.DefaultCollector
 delay = core.DelayCollector
 filter = core.FilterCollector
+get = core.GetCollector
 
 
 def dict(*args: Collector[X, Dict[str, Any]], **kwargs: Collector[X, Any]) -> Collector[X, Dict[str, Any]]:

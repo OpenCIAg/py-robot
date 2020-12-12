@@ -257,3 +257,17 @@ class AnyCollector(Collector[Iterable[X], X]):
 
     async def __call__(self, context: Context, item: Iterable[X]) -> X:
         return next(iter(item))
+
+
+@dataclass()
+class GetCollector(Collector[X, Y]):
+    url_collector: Collector[X, str]
+    collector: Collector[XmlNode, Y]
+
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: X) -> Y:
+        url = await self.url_collector(context, item)
+        sub_context, sub_item = await context.http_get(url)
+        result = await self.collector(sub_context, sub_item)
+        return result
