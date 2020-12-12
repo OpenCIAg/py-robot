@@ -21,7 +21,11 @@ class ContextImpl(Context):
             setattr(new_instance, k, v)
         return new_instance
 
-    def get_http_session(self):
+    def close(self):
+        self.http_session.close()
+        self.http_session = None
+
+    def get_http_session(self) -> HttpSession:
         if self.http_session is not None:
             return self.http_session
         self.http_session = self.http_engine.session()

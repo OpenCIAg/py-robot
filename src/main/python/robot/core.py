@@ -249,6 +249,9 @@ class CollectorFactory(object):
 class RobotImpl(Robot):
     context: Context = field(default_factory=ContextImpl)
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.context.close()
+
     async def run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
         url = self.context.resolve_url(url)
         sub_context, xml_node = await self.context.http_get(url)

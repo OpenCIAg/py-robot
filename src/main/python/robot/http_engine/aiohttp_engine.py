@@ -1,7 +1,9 @@
+import asyncio
+from typing import TypeVar, Tuple, Any
+
 import aiohttp
-from typing import AsyncContextManager
+
 from robot.api import HttpSession, HttpEngine
-from typing import TypeVar, Generic, Tuple, Any
 
 T = TypeVar('T')
 
@@ -17,11 +19,10 @@ class AioHttpSessionAdapter(HttpSession):
             content = await response.content.read()
             return response.headers, content
 
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        return await self.client_session.close()
+    def close(self):
+        asyncio.get_event_loop().run_until_complete(
+            self.client_session.close()
+        )
 
 
 class AioHttpAdapter(HttpEngine):

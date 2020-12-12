@@ -13,9 +13,12 @@ class HttpEngine():
         raise NotImplementedError()
 
 
-class HttpSession(AsyncContextManager['HttpSession']):
+class HttpSession():
 
     async def get(self, url):
+        raise NotImplementedError()
+
+    def close(self):
         raise NotImplementedError()
 
 
@@ -53,6 +56,9 @@ class Context():
     xml_engine: XmlEngine
     http_engine: HttpEngine
 
+    def close(self):
+        raise NotImplementedError()
+
     def resolve_url(self, url: str) -> str:
         raise NotImplementedError()
 
@@ -67,6 +73,12 @@ class Collector(Generic[X, Y]):
 
 
 class Robot():
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
     async def run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
         raise NotImplementedError()

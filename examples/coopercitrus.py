@@ -23,7 +23,7 @@ collector = array(
 )
 
 url_template = 'http://www.coopercitrus.com.br/?pag=noticias&pgN={0}&categoria=&busca='
-robot = RobotImpl()
-for url in [url_template.format(page) for page in range(1, 460)]:
-    result = robot.sync_run(collector, url)
-    print(json.dumps(result, indent=4))
+with RobotImpl() as robot:
+    for url in [url_template.format(page) for page in range(1, 460)]:
+        result = robot.sync_run(collector, url)
+        print(json.dumps(result, indent=4))
