@@ -71,11 +71,11 @@ class Robot():
     async def run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
         raise NotImplementedError()
 
-    async def run_many(self, collector: Collector[XmlNode, Y], *url: List[str]) -> List[Y]:
+    async def run_many(self, collector: Collector[XmlNode, Y], *urls: str) -> List[Y]:
         raise NotImplementedError()
 
     def sync_run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
         raise NotImplementedError()
 
-    def sync_run_many(self, collector: Collector[XmlNode, Y], *url: List[str]) -> List[Y]:
+    def sync_run_many(self, collector: Collector[XmlNode, Y], *url: str) -> List[Y]:
         raise NotImplementedError()

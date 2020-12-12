@@ -1,4 +1,8 @@
 import asyncio
+from dataclasses import dataclass, field
+from robot.api import Robot, Collector, XmlNode, Y, Context
+from robot.context.core import ContextImpl
+from typing import List
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
@@ -241,54 +245,30 @@ class CollectorFactory(object):
         return self.const_collector(const)
 
 
-class Robot(object):
-    def __init__(self, client, collector, timeout=10):
-        self.timeout = timeout
-        self.client = client
-        self.collector = collector
-        self.session = None
-        self.loop = None
-        self.first_url = None
+@dataclass()
+class RobotImpl(Robot):
+    context: Context = field(default_factory=ContextImpl)
 
-    def clone(self):
-        robot = Robot(self.client, self.collector, self.timeout)
-        robot.session = self.session
-        robot.loop = self.loop
-        robot.first_url = self.first_url
-        return robot
+    async def run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
+        url = self.context.resolve_url(url)
+        sub_context, xml_node = await self.context.http_get(url)
+        return await collector(sub_context, xml_node)
 
-    def prepare_url(self, url: str):
-        if '://' not in url:
-            if not url.startswith('/'):
-                url = '/' + url
-            return self.first_url.scheme + '://' + self.first_url.netloc + url
-        return url
+    async def run_many(self, collector: Collector[XmlNode, Y], *urls: str) -> List[Y]:
+        return await asyncio.gather(*[
+            self.run(collector, url)
+            for url in urls
+        ])
 
-    async def fetch(self, url: str):
-        url = self.prepare_url(url)
-        async with self.session.get(url) as response:
-            return await response.content.read()
+    def sync_run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
+        return self.sync_run_many(collector, url)[0]
 
-    async def __call__(self, url):
-        self.first_url = urlparse(url)
-        self.session = self.client.ClientSession()
-        html = await self.fetch(url)
-        document = xml_engine(html)
-        try:
-            result = await self.collector(document, self)
-            return result
-        finally:
-            await self.session.close()
-
-    def run_many(self, *urls):
+    def sync_run_many(self, collector: Collector[XmlNode, Y], *urls: List[str]) -> List[Y]:
         cpu_count = multiprocessing.cpu_count()
         thread_pool = ThreadPoolExecutor(cpu_count)
 
         with thread_pool:
-            self.loop = asyncio.get_event_loop()
-            self.loop.set_default_executor(thread_pool)
-            result = self.loop.run_until_complete(asyncio.gather(*[self.clone()(url) for url in urls]))
+            loop = asyncio.get_event_loop()
+            loop.set_default_executor(thread_pool)
+            result = loop.run_until_complete(self.run_many(collector, *urls))
             return result
-
-    def run(self, url):
-        return self.run_many(url)[0]

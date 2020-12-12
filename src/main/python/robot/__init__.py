@@ -1,2 +1,2 @@
 from .core import CollectorFactory
-from .core import Robot
+from .core import RobotImpl
