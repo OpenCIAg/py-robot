@@ -8,6 +8,7 @@ coverage = "*"
 pylint = "*"
 aiounittest = "*"
 twine = "*"
+pytest-httpserver = "*"
 
 [packages]
 aiohttp = "*"
@@ -15,7 +16,6 @@ pyquery = "*"
 
 [requires]
 python_version = "3.7"
-
 
 [scripts]
 test = "python -m unittest discover -s src/test/python"
