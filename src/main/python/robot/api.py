@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Callable, Iterable, Iterator, Tuple
+from typing import List, Callable, Iterable, Iterator, Tuple, AsyncContextManager
 from typing import TypeVar, Generic
 
 X = TypeVar('X')
@@ -9,7 +9,7 @@ Y = TypeVar('Y')
 
 class HttpEngine():
 
-    def session(self) -> HttpSession:
+    def session(self) -> AsyncContextManager[HttpSession]:
         raise NotImplementedError()
 
 

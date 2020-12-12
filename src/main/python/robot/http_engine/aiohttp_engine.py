@@ -1,5 +1,9 @@
 import aiohttp
+from typing import AsyncContextManager
 from robot.api import HttpSession, HttpEngine
+from typing import TypeVar, Generic
+
+T = TypeVar('T')
 
 
 class AioHttpSessionAdapter(HttpSession):
@@ -10,7 +14,14 @@ class AioHttpSessionAdapter(HttpSession):
 
     async def get(self, url):
         async with self.client_session.get(url, allow_redirects=True) as response:
-            return await response.content.read()
+            content = await response.content.read()
+            return content.decode()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        return await self.client_session.close()
 
 
 class AioHttpAdapter(HttpEngine):
@@ -18,6 +29,4 @@ class AioHttpAdapter(HttpEngine):
         self.aiohttp = aiohttp
 
     def session(self) -> HttpSession:
-        return AioHttpSessionAdapter(
-            self.aiohttp.ClientSession()
-        )
+        return AioHttpSessionAdapter(self.aiohttp.ClientSession())
