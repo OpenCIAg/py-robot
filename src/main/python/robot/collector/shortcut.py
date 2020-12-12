@@ -20,6 +20,8 @@ default = core.DefaultCollector
 delay = core.DelayCollector
 filter = core.FilterCollector
 get = core.GetCollector
+url = core.UrlCollector
+regex = core.RegexCollector
 
 
 def dict(*args: Collector[X, Dict[str, Any]], **kwargs: Collector[X, Any]) -> Collector[X, Dict[str, Any]]:

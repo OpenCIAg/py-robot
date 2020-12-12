@@ -3,9 +3,10 @@ import asyncio
 import logging
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable
+from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable, Union, Sequence
 
 from robot.api import Collector, Context, XmlNode, X, Y
+import re
 
 __logger__ = logging.getLogger(__name__)
 
@@ -271,3 +272,32 @@ class GetCollector(Collector[X, Y]):
         sub_context, sub_item = await context.http_get(url)
         result = await self.collector(sub_context, sub_item)
         return result
+
+
+@dataclass()
+class UrlCollector(Collector[str, str]):
+
+    async def __call__(self, context: Context, item: str) -> str:
+        return context.resolve_url(item)
+
+
+class RegexCollector(Collector[str, str]):
+
+    def __init__(self, regex):
+        if isinstance(regex, (str,)):
+            regex = re.compile(regex)
+        self.regex = regex
+
+    async def __call__(self, context: Context, item: str) -> Union[str, Sequence[str]]:
+        match = self.regex.search(item)
+        if not match:
+            return None
+        group_dict = match.groupdict()
+        if group_dict:
+            return group_dict
+        groups = match.groups()
+        if len(groups) > 1:
+            return groups
+        elif groups:
+            return groups[0]
+        return match.group(0)
