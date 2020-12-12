@@ -15,7 +15,7 @@ class AioHttpSessionAdapter(HttpSession):
     async def get(self, url) -> Tuple[Any, str]:
         async with self.client_session.get(url, allow_redirects=True) as response:
             content = await response.content.read()
-            return response.headers, content.decode()
+            return response.headers, content
 
     async def __aenter__(self):
         return self
