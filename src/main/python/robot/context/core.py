@@ -25,6 +25,7 @@ class ContextImpl(Context):
         if self.http_session is not None:
             return self.http_session
         self.http_session = self.http_engine.session()
+        return self.http_session
 
     def resolve_url(self, url: str):
         if self.url is None:
