@@ -1,26 +1,25 @@
 import json
 
-import aiohttp
-
-from robot import CollectorFactory
-from robot import Robot
+from robot import RobotImpl
+from robot.collector.shortcut import *
 
 url = 'https://elvisfusco.com.br/feed/'
 
-collector_factory = CollectorFactory()
-
-collector = collector_factory.array(
-    'item', collector_factory.obj(
-        title=collector_factory.attr('title'),
-        author=collector_factory.attr('author'),
-        description=collector_factory.attr('description'),
-        link=collector_factory.attr('link'),
-        link_title=collector_factory.remote('link', collector_factory.attr('title')),
-        tags=collector_factory.array('category')
+collector = array(
+    css('item'),
+    dict(
+        title=pipe(css('title'), as_text()),
+        author=pipe(css('author'), as_text()),
+        description=pipe(css('description'), as_text()),
+        link=pipe(css('link'), as_text()),
+        link_title=get(
+            pipe(css('link'), as_text()),
+            pipe(css('title'), as_text()),
+        ),
+        tags=pipe(css('category'), text()),
     )
 )
 
-robot = Robot(aiohttp, collector)
-
-result = robot.run(url)
-print(json.dumps(list(result), indent=4))
+with RobotImpl() as robot:
+    result = robot.sync_run(collector, url)
+    print(json.dumps(list(result), indent=4))
