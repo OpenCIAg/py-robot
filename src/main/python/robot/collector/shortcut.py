@@ -1,6 +1,6 @@
 from robot.collector import core
 
-
+const = core.ConstCollector
 as_text = core.AsTextCollector
 text = core.TextCollector
 attr = core.AttrCollector

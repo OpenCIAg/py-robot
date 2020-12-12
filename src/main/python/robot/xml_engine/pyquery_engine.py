@@ -8,17 +8,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
 class PyQueryNodeAdapter(XmlNode):
-
     logger = logger
     engine: PyQueryAdapter
     content: PyQuery
-    
+
     def __init__(self, engine: PyQueryAdapter, content: PyQuery):
         self.engine = engine
         self.content = content
-
 
     def __iter__(self) -> Iterator[PyQueryNodeAdapter]:
         return self._map(self.content)
@@ -27,7 +24,6 @@ class PyQueryNodeAdapter(XmlNode):
         for item in pyquery:
             yield PyQueryNodeAdapter(self.engine, self.engine.pyquery(item))
 
-    
     def find_by_css(self, css: str) -> XmlNode:
         return PyQueryNodeAdapter(self.engine, self.content.find(css))
 
@@ -59,13 +55,11 @@ class PyQueryNodeAdapter(XmlNode):
 
 
 class PyQueryAdapter(XmlEngine):
-
     logger = logger
-    pyquery : PyQuery
+    pyquery: PyQuery
 
-    def __init__(self, pyquery = PyQuery):
+    def __init__(self, pyquery=PyQuery):
         self.pyquery = pyquery
 
-
-    def  __call__(self, raw_xml: str) -> PyQueryNodeAdapter:
+    def __call__(self, raw_xml: str) -> PyQueryNodeAdapter:
         return PyQueryNodeAdapter(self, self.pyquery(raw_xml))
