@@ -5,40 +5,38 @@ from robot.xml_engine.pyquery_engine import PyQueryAdapter
 
 raw_html = """
 <html>
-    <table>
-        <tr>
-            <td>1</td>
-            <td>2</td>
-        </tr>
-        <tr>
-            <td>3</td>
-            <td>4</td>
-        </tr>
-    </table>
-</htm>
+<ul>
+    <li>
+        <a href="//fuu1">Fuu 1</a>
+    </li>
+    <li>
+        <a href="//fuu2">Fuu 2</a>
+    </li>
+</ul>
+</html>
 """
 
 
-class ArrayCollectorTest(AsyncTestCase):
+class AsTextCollectorTest(AsyncTestCase):
 
-    async def test_tr_with_css(self):
+    async def test_get_link_as_text(self):
         xml_engine = PyQueryAdapter()
         collector = array(
-            xpath('//tr/td[position()=2]'),
-            as_text()
+            css('ul > li > a'),
+            as_text(),
         )
         html = xml_engine(raw_html)
-        expected = ['2', '4']
+        expected = ['Fuu 1', 'Fuu 2']
         result = await collector(None, html)
         self.assertEqual(expected, list(result))
 
-    async def test_tr_with_xpath(self):
+    async def test_get_list_as_text(self):
         xml_engine = PyQueryAdapter()
         collector = array(
-            css('tr td:nth-child(2)'),
-            as_text()
+            css('ul'),
+            as_text(),
         )
         html = xml_engine(raw_html)
-        expected = ['2', '4']
+        expected = ['Fuu 1\nFuu 2']
         result = await collector(None, html)
         self.assertEqual(expected, list(result))

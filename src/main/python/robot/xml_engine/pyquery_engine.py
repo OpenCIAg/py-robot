@@ -35,12 +35,6 @@ class PyQueryNodeAdapter(XmlNode):
     def find_by_xpath(self, xpath: str) -> XmlNode:
         return PyQueryNodeAdapter(self.engine, self.engine.pyquery(self.content.root.xpath(xpath)))
 
-    def cast(self, cast_fn: Callable[[XmlNode], Y]) -> Y:
-        return cast_fn(next(iter(self)))
-
-    def cast_all(self, cast_fn: Callable[[XmlNode], Y]) -> List[Y]:
-        return list(map(cast_fn, self))
-
     def as_text(self) -> str:
         return self.content.text()
 

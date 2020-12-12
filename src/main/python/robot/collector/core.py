@@ -1,8 +1,9 @@
+from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import List, Any, Callable, Iterable, Dict, Tuple
+from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable
 
 from robot.api import Collector, Context, XmlNode, X, Y
 
@@ -33,30 +34,44 @@ class DefaultCollector(Collector[Any, Any]):
         self.collectors = collectors
         self.logger = logger
 
+    def is_empty(self, value):
+        if value is None:
+            return True
+        if isinstance(value, (str,)):
+            if value.strip() == '':
+                return True
+            return False
+        if isinstance(value, Iterable):
+            for item in value:
+                if not self.is_empty(item):
+                    return False
+            return True
+        return False
+
     async def __call__(self, context: Context, item: Any) -> Any:
         for collector in self.collectors:
-            item = await collector(context, item)
-            if item:
-                return item
-        return item
+            result = await collector(context, item)
+            if not self.is_empty(result):
+                return result
+        return None
 
 
 @dataclass()
 class FnCollector(Collector[X, Y]):
-    fn: Callable[[Context, X], Y]
+    fn: Callable[[X], Y]
     logger: Logger = field(default=__logger__, compare=False)
 
     async def __call__(self, context: Context, item: X) -> Y:
-        return self.fn(context, item)
+        return self.fn(item)
 
 
 @dataclass()
-class AsyncCollector(Collector[X, Y]):
-    fn: Callable[[Context, X], Y]
+class AsyncFnCollector(Collector[X, Y]):
+    fn: Callable[[X], Awaitable[Y]]
     logger: Logger = field(default=__logger__, compare=False)
 
     async def __call__(self, context: Context, item: X) -> Y:
-        return await self.fn(context, item)
+        return await self.fn(item)
 
 
 @dataclass()
@@ -87,8 +102,38 @@ class ArrayCollector(Collector[X, List[Y]]):
 
     async def __call__(self, context: Context, item: X) -> Iterable[Y]:
         sub_items = await self.splitter(context, item)
-        collected_items = await asyncio.gather(*[self.item_collector(context, sub_item) for sub_item in sub_items])
+        collected_items = await asyncio.gather(*[
+            self.item_collector(context, sub_item)
+            for sub_item in sub_items
+        ])
         return collected_items
+
+
+@dataclass(init=False)
+class TupleCollector(Collector[X, Tuple]):
+    collectors: Tuple[Collector[X, Any]]
+    logger: Logger = field(default=__logger__, compare=False)
+
+    def __init__(self, *collectors: Collector[X, Any], logger=__logger__):
+        self.collectors = collectors
+        self.logger = logger
+
+    async def __call__(self, context: Context, item: X) -> Tuple:
+        collected_items = await asyncio.gather(*[
+            collector(context, item)
+            for collector in self.collectors
+        ])
+        return collected_items
+
+
+@dataclass()
+class DelayCollector(Collector[X, X]):
+    delay: float
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: X) -> X:
+        await asyncio.sleep(self.delay)
+        return item
 
 
 @dataclass()
@@ -107,6 +152,39 @@ class DictCollector(Collector[X, Dict[str, Any]]):
         return obj
 
 
+class Object(object):
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> Object:
+        return cls(dict([
+            (k, v if not isinstance(v, dict) else cls.from_dict(v))
+            for k, v in data.items()
+        ]))
+
+    def __init__(self, attributes):
+        self.__dict__.update(attributes)
+
+    def __eq__(self, other):
+        if other is None:
+            return False
+        return self.__dict__ == other.__dict__
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.__dict__})'
+
+
+@dataclass()
+class ObjectCollector(Collector[X, Y]):
+    dict_collector: DictCollector[X]
+    cast: Callable[[Dict[str, Any]], Y] = field(default=Object.from_dict)
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: X) -> Dict[str, Any]:
+        value = await self.dict_collector(context, item)
+        result = self.cast(value)
+        return result
+
+
 @dataclass()
 class CssCollector(Collector[XmlNode, XmlNode]):
     css_selector: str
@@ -114,6 +192,15 @@ class CssCollector(Collector[XmlNode, XmlNode]):
 
     async def __call__(self, context: Context, item: XmlNode) -> XmlNode:
         return item.find_by_css(self.css_selector)
+
+
+@dataclass()
+class XPathCollector(Collector[XmlNode, XmlNode]):
+    xpath: str
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: XmlNode) -> XmlNode:
+        return item.find_by_xpath(self.xpath)
 
 
 @dataclass()
@@ -142,13 +229,11 @@ class TextCollector(Collector[XmlNode, Iterable[str]]):
 @dataclass()
 class AttrCollector(Collector[XmlNode, Iterable[str]]):
     attr: str
-    prefix: str = ''
-    suffix: str = ''
     logger: Logger = field(default=__logger__, compare=False)
 
     async def __call__(self, context: Context, item: XmlNode) -> Iterable[str]:
         return [
-            self.prefix + value + self.suffix
+            value
             for value in item.attr(self.attr)
         ]
 
