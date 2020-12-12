@@ -1,17 +1,22 @@
 from __future__ import annotations
-from typing import Iterator, Iterable, Callable, List
-from robot.api import XmlEngine, XmlNode, O
-from pyquery import PyQuery
 
 import logging
+from dataclasses import dataclass, field
+from logging import Logger
+from typing import Iterator, Iterable, Callable, List
 
-logger = logging.getLogger(__name__)
+from pyquery import PyQuery
+
+from robot.api import XmlEngine, XmlNode, O
+
+__logger__ = logging.getLogger(__name__)
 
 
+@dataclass()
 class PyQueryNodeAdapter(XmlNode):
-    logger = logger
-    engine: PyQueryAdapter
+    engine: PyQueryAdapter = field(compare=False)
     content: PyQuery
+    logger: Logger = field(default=__logger__, compare=False)
 
     def __init__(self, engine: PyQueryAdapter, content: PyQuery):
         self.engine = engine
@@ -54,12 +59,10 @@ class PyQueryNodeAdapter(XmlNode):
         return f'{self.__class__.__name__}{{ {self.content} }}'
 
 
+@dataclass()
 class PyQueryAdapter(XmlEngine):
-    logger = logger
-    pyquery: PyQuery
-
-    def __init__(self, pyquery=PyQuery):
-        self.pyquery = pyquery
+    pyquery: PyQuery = field(default=PyQuery, compare=False)
+    logger: Logger = field(default=__logger__, compare=False)
 
     def __call__(self, raw_xml: str) -> PyQueryNodeAdapter:
         return PyQueryNodeAdapter(self, self.pyquery(raw_xml))
