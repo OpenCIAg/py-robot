@@ -14,8 +14,9 @@ class PipeCollector(Collector[Any, Any]):
     collectors: Tuple[Collector[Any, Any]]
     logger: Logger = field(default=__logger__, compare=False)
 
-    def __init__(self, *collectors: Collector[Any, Any]):
+    def __init__(self, *collectors: Collector[Any, Any], logger=__logger__):
         self.collectors = collectors
+        self.logger = logger
 
     async def __call__(self, context: Context, item: Any) -> Any:
         for collector in self.collectors:
@@ -28,8 +29,9 @@ class DefaultCollector(Collector[Any, Any]):
     collectors: Tuple[Collector[Any, Any]]
     logger: Logger = field(default=__logger__, compare=False)
 
-    def __init__(self, *collectors: Collector[Any, Any]):
+    def __init__(self, *collectors: Collector[Any, Any], logger=__logger__):
         self.collectors = collectors
+        self.logger = logger
 
     async def __call__(self, context: Context, item: Any) -> Any:
         for collector in self.collectors:
@@ -91,15 +93,18 @@ class ArrayCollector(Collector[I, List[O]]):
 
 @dataclass()
 class DictCollector(Collector[I, Dict[str, Any]]):
+    nested_collectors: Tuple[Collector[I, Dict[str, Any]]] = ()
+    field_collectors: Dict[str, Collector[I, Any]] = field(default_factory=dict)
     logger: Logger = field(default=__logger__, compare=False)
 
-    def __init__(self, nested_collectors: List[Collector[I, Dict[str, Any]]],
-                 collectors_map: Dict[str, Collector[I, Any]]):
-        self.nested_collectors = nested_collectors
-        self.collectors_map = collectors_map
-
     async def __call__(self, context: Context, item: I) -> Dict[str, Any]:
-        pass
+        obj = dict()
+        for collector in self.nested_collectors:
+            result = await collector(context, item)
+            obj.update(result)
+        for attr_name, collector in self.field_collectors.items():
+            obj[attr_name] = await collector(context, item)
+        return obj
 
 
 @dataclass()
