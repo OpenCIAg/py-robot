@@ -7,6 +7,7 @@ image: python:3.7
 variables:
   PYTHONPATH: src/main/python/
   PIPENV_VENV_IN_PROJECT: "true"
+  PATH: "/root/.local/bin:$PATH"
 
 cache: &python_cache
   key: venv
