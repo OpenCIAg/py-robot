@@ -239,6 +239,19 @@ class AttrCollector(Collector[XmlNode, Iterable[str]]):
 
 
 @dataclass()
+class FilterCollector(Collector):
+    predicate: Callable[[X], bool]
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: Iterable) -> Iterable:
+        return [
+            value
+            for value in item
+            if self.predicate(value)
+        ]
+
+
+@dataclass()
 class AnyCollector(Collector[Iterable[X], X]):
     logger: Logger = field(default=__logger__, compare=False)
 
