@@ -1,4 +1,4 @@
-from robot.api import Collector, I
+from robot.api import Collector, X
 from typing import Any, Dict
 from robot.collector import core
 
@@ -13,7 +13,7 @@ any = core.AnyCollector
 default = core.DefaultCollector
 
 
-def dict(*args: Collector[I, Dict[str, Any]], **kwargs: Collector[I, Any]) -> Collector[I, Dict[str, Any]]:
+def dict(*args: Collector[X, Dict[str, Any]], **kwargs: Collector[X, Any]) -> Collector[X, Dict[str, Any]]:
     return core.DictCollector(
         args,
         kwargs

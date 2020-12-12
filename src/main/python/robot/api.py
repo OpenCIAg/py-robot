@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import List, Callable, Iterable, Iterator
 from typing import TypeVar, Generic
 
-I = TypeVar('I')
-O = TypeVar('O')
+X = TypeVar('X')
+Y = TypeVar('Y')
 
 
 class HttpEngine():
@@ -22,10 +22,10 @@ class XmlNode(Iterable['XmlNode']):
     def find_by_xpath(self, xpath: str) -> XmlNode:
         raise NotImplementedError()
 
-    def cast(self, cast_fn: Callable[[XmlNode], O]) -> O:
+    def cast(self, cast_fn: Callable[[XmlNode], Y]) -> Y:
         raise NotImplementedError()
 
-    def cast_all(self, cast_fn: Callable[[XmlNode], O]) -> Iterable[O]:
+    def cast_all(self, cast_fn: Callable[[XmlNode], Y]) -> Iterable[Y]:
         raise NotImplementedError()
 
     def as_text(self) -> Iterable[str]:
@@ -46,22 +46,22 @@ class Context():
     http_engine: HttpEngine
 
 
-class Collector(Generic[I, O]):
+class Collector(Generic[X, Y]):
 
-    async def __call__(self, context: Context, item: I) -> O:
+    async def __call__(self, context: Context, item: X) -> Y:
         raise NotImplementedError()
 
 
 class Robot():
 
-    async def run(self, collector: Collector[XmlNode, O], url: str) -> O:
+    async def run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
         raise NotImplementedError()
 
-    async def run_many(self, collector: Collector[XmlNode, O], *url: List[str]) -> List[O]:
+    async def run_many(self, collector: Collector[XmlNode, Y], *url: List[str]) -> List[Y]:
         raise NotImplementedError()
 
-    def sync_run(self, collector: Collector[XmlNode, O], url: str) -> O:
+    def sync_run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
         raise NotImplementedError()
 
-    def sync_run_many(self, collector: Collector[XmlNode, O], *url: List[str]) -> List[O]:
+    def sync_run_many(self, collector: Collector[XmlNode, Y], *url: List[str]) -> List[Y]:
         raise NotImplementedError()

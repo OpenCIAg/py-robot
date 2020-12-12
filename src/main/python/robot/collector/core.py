@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from logging import Logger
 from typing import List, Any, Callable, Iterable, Dict, Tuple
 
-from robot.api import Collector, Context, XmlNode, I, O
+from robot.api import Collector, Context, XmlNode, X, Y
 
 __logger__ = logging.getLogger(__name__)
 
@@ -42,28 +42,28 @@ class DefaultCollector(Collector[Any, Any]):
 
 
 @dataclass()
-class FnCollector(Collector[I, O]):
-    fn: Callable[[Context, I], O]
+class FnCollector(Collector[X, Y]):
+    fn: Callable[[Context, X], Y]
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: I) -> O:
+    async def __call__(self, context: Context, item: X) -> Y:
         return self.fn(context, item)
 
 
 @dataclass()
-class AsyncCollector(Collector[I, O]):
-    fn: Callable[[Context, I], O]
+class AsyncCollector(Collector[X, Y]):
+    fn: Callable[[Context, X], Y]
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: I) -> O:
+    async def __call__(self, context: Context, item: X) -> Y:
         return await self.fn(context, item)
 
 
 @dataclass()
-class NoopCollector(Collector[I, I]):
+class NoopCollector(Collector[X, X]):
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: I) -> I:
+    async def __call__(self, context: Context, item: X) -> X:
         return item
 
 
@@ -71,33 +71,33 @@ NOOP_COLLECTOR = NoopCollector()
 
 
 @dataclass()
-class ConstCollector(Collector[Any, O]):
-    value: O
+class ConstCollector(Collector[Any, Y]):
+    value: Y
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: Any) -> O:
+    async def __call__(self, context: Context, item: Any) -> Y:
         return self.value
 
 
 @dataclass()
-class ArrayCollector(Collector[I, List[O]]):
-    splitter: Collector[I, Iterable[Any]]
-    item_collector: Collector[Any, O] = NOOP_COLLECTOR
+class ArrayCollector(Collector[X, List[Y]]):
+    splitter: Collector[X, Iterable[Any]]
+    item_collector: Collector[Any, Y] = NOOP_COLLECTOR
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: I) -> Iterable[O]:
+    async def __call__(self, context: Context, item: X) -> Iterable[Y]:
         sub_items = await self.splitter(context, item)
         collected_items = await asyncio.gather(*[self.item_collector(context, sub_item) for sub_item in sub_items])
         return collected_items
 
 
 @dataclass()
-class DictCollector(Collector[I, Dict[str, Any]]):
-    nested_collectors: Tuple[Collector[I, Dict[str, Any]]] = ()
-    field_collectors: Dict[str, Collector[I, Any]] = field(default_factory=dict)
+class DictCollector(Collector[X, Dict[str, Any]]):
+    nested_collectors: Tuple[Collector[X, Dict[str, Any]]] = ()
+    field_collectors: Dict[str, Collector[X, Any]] = field(default_factory=dict)
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: I) -> Dict[str, Any]:
+    async def __call__(self, context: Context, item: X) -> Dict[str, Any]:
         obj = dict()
         for collector in self.nested_collectors:
             result = await collector(context, item)
@@ -154,8 +154,8 @@ class AttrCollector(Collector[XmlNode, Iterable[str]]):
 
 
 @dataclass()
-class AnyCollector(Collector[Iterable[I], I]):
+class AnyCollector(Collector[Iterable[X], X]):
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: Iterable[I]) -> I:
+    async def __call__(self, context: Context, item: Iterable[X]) -> X:
         return next(iter(item))
