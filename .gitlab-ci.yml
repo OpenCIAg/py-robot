@@ -25,7 +25,7 @@ prepare-env:
     policy: pull-push
   before_script: []
   script:
-    - python -m pip install --user -U pip pipenv
+    - python -m pip install -U pip pipenv
     - pipenv install --dev
     - pipenv lock -r > requirements.txt
     - pipenv lock -dr > requirements-dev.txt
