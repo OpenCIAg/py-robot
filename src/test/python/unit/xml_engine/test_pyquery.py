@@ -3,7 +3,7 @@ from aiounittest import AsyncTestCase
 from robot.api import XmlEngine
 from robot.xml_engine.pyquery_engine import PyQueryAdapter
 
-raw_html = """
+raw_html = b"""
     <table>
         <tr>
             <td row="0" col="0">1</td>

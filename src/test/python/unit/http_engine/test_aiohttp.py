@@ -4,7 +4,7 @@ from robot.http_engine.aiohttp_engine import AioHttpAdapter
 from aiounittest import AsyncTestCase
 from pytest_httpserver import HTTPServer
 
-h1_hello = """
+h1_hello = b"""
 <html>
    <h1>Hello</h1>
 </html>
@@ -22,7 +22,7 @@ class AioHttpTest(AsyncTestCase):
             async with aiohttp.ClientSession() as session:
                 response = await session.get(url)
                 result = await response.content.read()
-                self.assertEqual(h1_hello, result.decode())
+                self.assertEqual(h1_hello, result)
 
 
 class AioHttpEngineTest(AsyncTestCase):

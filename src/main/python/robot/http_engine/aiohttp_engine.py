@@ -19,10 +19,14 @@ class AioHttpSessionAdapter(HttpSession):
             content = await response.content.read()
             return response.headers, content
 
-    def close(self):
-        asyncio.get_event_loop().run_until_complete(
-            self.client_session.close()
-        )
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        return await self.close()
+
+    async def close(self):
+        return await self.client_session.close()
 
 
 class AioHttpAdapter(HttpEngine):

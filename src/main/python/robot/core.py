@@ -12,8 +12,22 @@ from robot.context.core import ContextImpl
 class RobotImpl(Robot):
     context: Context = field(default_factory=ContextImpl)
 
+    _loop = None
+    _thread_poll = None
+
+    def __enter__(self):
+        cpu_count = multiprocessing.cpu_count()
+        thread_pool = ThreadPoolExecutor(cpu_count)
+        self._loop = asyncio.get_event_loop()
+        self._loop.set_default_executor(thread_pool)
+        self._thread_poll = thread_pool.__enter__()
+        return self
+
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.context.close()
+        self._loop.run_until_complete(
+            self.context.close()
+        )
+        self._thread_poll.__exit__(exc_type, exc_val, exc_tb)
 
     async def run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
         url = self.context.resolve_url(url)
@@ -30,11 +44,5 @@ class RobotImpl(Robot):
         return self.sync_run_many(collector, url)[0]
 
     def sync_run_many(self, collector: Collector[XmlNode, Y], *urls: List[str]) -> List[Y]:
-        cpu_count = multiprocessing.cpu_count()
-        thread_pool = ThreadPoolExecutor(cpu_count)
-
-        with thread_pool:
-            loop = asyncio.get_event_loop()
-            loop.set_default_executor(thread_pool)
-            result = loop.run_until_complete(self.run_many(collector, *urls))
-            return result
+        result = self._loop.run_until_complete(self.run_many(collector, *urls))
+        return result

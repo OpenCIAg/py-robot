@@ -18,7 +18,13 @@ class HttpSession():
     async def get(self, url):
         raise NotImplementedError()
 
-    def close(self):
+    async def __aenter__(self):
+        raise NotImplementedError()
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        raise NotImplementedError()
+
+    async def close(self):
         raise NotImplementedError()
 
 
@@ -56,7 +62,7 @@ class Context():
     xml_engine: XmlEngine
     http_engine: HttpEngine
 
-    def close(self):
+    async def close(self):
         raise NotImplementedError()
 
     def resolve_url(self, url: str) -> str:

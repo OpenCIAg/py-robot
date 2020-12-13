@@ -3,7 +3,7 @@ from aiounittest import AsyncTestCase
 from robot.collector.shortcut import *
 from robot.xml_engine.pyquery_engine import PyQueryAdapter
 
-raw_html = """
+raw_html = b"""
 <html>
     <table>
         <tr>
