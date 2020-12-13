@@ -4,14 +4,11 @@ sudo: false
 env:
   - PIPENV_VENV_IN_PROJECT=true
 python:
-  - 3.6
   - 3.7
   - 3.8
 before_install:
-  - pip install pipenv coverage==4.3 codeclimate-test-reporter
+  - pip install pipenv
 install:
   - pipenv install --dev
-script: 
-  - pipenv run coverage
-after_success:
-  - codeclimate-test-reporter
+script:
+  - pipenv run test
