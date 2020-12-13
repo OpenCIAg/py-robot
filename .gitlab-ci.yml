@@ -2,6 +2,7 @@ stages:
   - prepare
   - test
   - dist
+  - report
 
 image: python:3.7
 variables:
@@ -22,7 +23,7 @@ prepare-env:
   cache:
     <<: *python_cache
     policy: pull-push
-  before_script: []
+  before_script: [ ]
   script:
     - python -m pip install -U pip pipenv
     - pipenv install --dev
@@ -67,3 +68,13 @@ release:
   artifacts:
     paths:
       - dist/
+
+code-climate-coverage:
+  stage: report
+  cache:
+    key: code-climate
+  script:
+    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+    - chmod +x ./cc-test-reporter
+    - ./cc-test-reporter after-build --exit-code 0
+
