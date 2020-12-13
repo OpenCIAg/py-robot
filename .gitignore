@@ -6,6 +6,7 @@ __pycache__/**
 /build
 /dist
 /htmlcov
+/coverage.xml
 !.env
 !.travis.yml
 !.gitignore
