@@ -1,4 +1,4 @@
-from robot import RobotImpl
+from robot import Robot
 from robot.collector.shortcut import *
 
 collector = array(
@@ -15,7 +15,7 @@ collector = array(
     )
 )
 
-with RobotImpl() as robot:
+with Robot() as robot:
     result = robot.sync_run(collector, 'http://www.dataversity.net/category/education/daily-data/')
 
 for r in result:

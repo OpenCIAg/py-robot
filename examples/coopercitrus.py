@@ -1,6 +1,6 @@
 import json
 
-from robot import RobotImpl
+from robot import Robot
 from robot.collector.shortcut import *
 
 base_url = 'http://www.coopercitrus.com.br/'
@@ -23,7 +23,7 @@ collector = array(
 )
 
 url_template = 'http://www.coopercitrus.com.br/?pag=noticias&pgN={0}&categoria=&busca='
-with RobotImpl() as robot:
+with Robot() as robot:
     for url in [url_template.format(page) for page in range(1, 460)]:
         result = robot.sync_run(collector, url)
         print(json.dumps(result, indent=4))

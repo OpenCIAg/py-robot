@@ -1,8 +1,5 @@
-from robot import CollectorFactory
-from robot import RobotImpl
+from robot import Robot
 from robot.collector.shortcut import *
-
-cf = CollectorFactory()
 
 collector = array(
     css('.theiaStickySidebar ul li'),
@@ -18,7 +15,7 @@ collector = array(
     )
 )
 
-with RobotImpl() as robot:
+with Robot() as robot:
     result = robot.sync_run(collector, 'https://iot.eetimes.com/')
 
 for r in result:

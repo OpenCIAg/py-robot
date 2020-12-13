@@ -1,6 +1,6 @@
 import json
 
-from robot import RobotImpl
+from robot import Robot
 from robot.collector.shortcut import *
 
 url = 'https://elvisfusco.com.br/feed/'
@@ -20,6 +20,6 @@ collector = array(
     )
 )
 
-with RobotImpl() as robot:
+with Robot() as robot:
     result = robot.sync_run(collector, url)
     print(json.dumps(list(result), indent=4))
