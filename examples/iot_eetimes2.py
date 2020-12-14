@@ -1,3 +1,4 @@
+import json
 from robot import Robot
 from robot.collector.shortcut import *
 
@@ -7,16 +8,15 @@ collector = array(
         get(
             pipe(css('a[href]'), attr('href'), any()),
             dict(
-                body=pipe(css('p'), as_text())
+                body=pipe(css('p'), as_text()),
+                title=pipe(css('h1.post-title'), as_text()),
             )
         ),
-        title=pipe(css('span'), as_text()),
+        category=pipe(css('span'), as_text()),
         url=pipe(css('a[href]'), attr('href'), any(), url())
     )
 )
 
 with Robot() as robot:
     result = robot.sync_run(collector, 'https://iot.eetimes.com/')
-
-for r in result:
-    print(r)
+print(json.dumps(result, indent=4))
