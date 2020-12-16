@@ -14,6 +14,13 @@ class AioHttpSessionAdapter(HttpSession):
     def __init__(self, client_session: aiohttp.ClientSession):
         self.client_session = client_session
 
+    async def download(self, url: str, filename: str):
+        async with self.client_session.get(url) as response:
+            if response.status != 200:
+                raise Exception()
+            with open(filename, 'wb') as output:
+                output.write(await response.read())
+
     async def get(self, url) -> Tuple[Any, str]:
         async with self.client_session.get(url, allow_redirects=True) as response:
             content = await response.content.read()

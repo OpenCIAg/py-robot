@@ -56,6 +56,10 @@ class ContextImpl(Context):
             url,
         ])
 
+    async def download(self, url: str, filename: str):
+        session = self.get_http_session()
+        await session.download(url, filename)
+
     async def http_get(self, url) -> Tuple[Context, XmlNode]:
         session = self.get_http_session()
         url = self.resolve_url(url)

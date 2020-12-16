@@ -25,6 +25,8 @@ from robot.collector.core import DefaultCollector as default
 # noinspection PyUnresolvedReferences
 from robot.collector.core import DelayCollector as delay
 # noinspection PyUnresolvedReferences
+from robot.collector.core import DownloadCollector as download
+# noinspection PyUnresolvedReferences
 from robot.collector.core import FilterCollector as filter
 # noinspection PyUnresolvedReferences
 from robot.collector.core import FnCollector as fn

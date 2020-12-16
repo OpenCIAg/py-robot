@@ -393,3 +393,14 @@ class AsyncTapCollector(Collector[X, X]):
     async def __call__(self, context: Context, item: X) -> X:
         await self.fn(item)
         return item
+
+
+@dataclass()
+class DownloadCollector(Collector[str, str]):
+    filename: Collector[Any, str]
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: str) -> str:
+        filename = await self.filename(context, item)
+        await context.download(item, filename)
+        return filename

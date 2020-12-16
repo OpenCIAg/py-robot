@@ -15,6 +15,9 @@ class HttpEngine():
 
 class HttpSession():
 
+    async def download(self, url: str, filename: str):
+        raise NotImplementedError()
+
     async def get(self, url):
         raise NotImplementedError()
 
@@ -66,6 +69,9 @@ class Context():
         raise NotImplementedError()
 
     def resolve_url(self, url: str) -> str:
+        raise NotImplementedError()
+
+    async def download(self, url: str, filename: str):
         raise NotImplementedError()
 
     async def http_get(self, url) -> Tuple[Context, XmlNode]:
