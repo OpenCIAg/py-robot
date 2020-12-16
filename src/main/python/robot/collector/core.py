@@ -146,11 +146,20 @@ class DictCollector(Collector[X, Dict[str, Any]]):
 
     async def __call__(self, context: Context, item: X) -> Dict[str, Any]:
         obj = dict()
-        for collector in self.nested_collectors:
-            result = await collector(context, item)
-            obj.update(result)
-        for attr_name, collector in self.field_collectors.items():
-            obj[attr_name] = await collector(context, item)
+        collected_items = await asyncio.gather(*[
+            collector(context, item)
+            for collector in self.nested_collectors
+        ])
+        for collected_item in collected_items:
+            obj.update(collected_item)
+        if not self.field_collectors:
+            return obj
+        keys, collectors = zip(*self.field_collectors.items())
+        values = await asyncio.gather(*[
+            collector(context, item)
+            for collector in collectors
+        ])
+        obj.update(dict(zip(keys, values)))
         return obj
 
 
