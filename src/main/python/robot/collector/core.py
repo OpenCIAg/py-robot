@@ -302,6 +302,19 @@ class RegexCollector(Collector[str, str]):
         elif groups:
             return groups[0]
         return match.group(0)
+
+
+@dataclass()
+class ContextCollector(Collector[Any, Dict[str, Any]]):
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: Any) -> Context:
+        return dict(context)
+
+
+CONTEXT = ContextCollector()
+
+
 @dataclass(init=False)
 class JsonPathCollector(Collector[Any, Any]):
     logger: Logger = field(default=__logger__, compare=False)

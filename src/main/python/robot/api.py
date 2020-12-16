@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Callable, Iterable, Iterator, Tuple, AsyncContextManager
+from typing import List, Callable, Iterable, Iterator, Tuple, AsyncContextManager, Dict, Any
 from typing import TypeVar, Generic
 
 X = TypeVar('X')
@@ -69,6 +69,9 @@ class Context():
         raise NotImplementedError()
 
     async def http_get(self, url) -> Tuple[Context, XmlNode]:
+        raise NotImplementedError()
+
+    def __iter__(self):
         raise NotImplementedError()
 
 

@@ -43,6 +43,7 @@ from robot.collector.core import XPathCollector as xpath
 
 noop = lambda: core.NOOP_COLLECTOR
 
+context = lambda: core.CONTEXT
 
 def dict(*args: Collector[X, Dict[str, Any]], **kwargs: Collector[X, Any]) -> Collector[X, Dict[str, Any]]:
     return core.DictCollector(

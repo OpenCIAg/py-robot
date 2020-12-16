@@ -15,6 +15,10 @@ class ContextImpl(Context):
     http_headers: Dict[str, str] = field(default_factory=dict)
     http_session: HttpSession = None
 
+    def __iter__(self):
+        yield 'url', self.url.geturl()
+        yield 'headers', dict(self.http_headers)
+
     def clone(self, **override) -> ContextImpl:
         new_instance = self.__class__(**self.__dict__)
         for k, v in override.items():
