@@ -340,3 +340,12 @@ class TapCollector(Collector[X, X]):
         self.fn(item)
         return item
 
+
+@dataclass()
+class AsyncTapCollector(Collector[X, X]):
+    fn: Callable[[X], Awaitable[Any]]
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: X) -> X:
+        await self.fn(item)
+        return item

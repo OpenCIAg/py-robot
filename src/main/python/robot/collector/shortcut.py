@@ -11,6 +11,8 @@ from robot.collector.core import AsTextCollector as as_text
 # noinspection PyUnresolvedReferences
 from robot.collector.core import AsyncFnCollector as afn
 # noinspection PyUnresolvedReferences
+from robot.collector.core import AsyncTapCollector as atap
+# noinspection PyUnresolvedReferences
 from robot.collector.core import AttrCollector as attr
 # noinspection PyUnresolvedReferences
 from robot.collector.core import ConstCollector as const
@@ -46,6 +48,7 @@ from robot.collector.core import XPathCollector as xpath
 noop = lambda: core.NOOP_COLLECTOR
 
 context = lambda: core.CONTEXT
+
 
 def dict(*args: Collector[X, Dict[str, Any]], **kwargs: Collector[X, Any]) -> Collector[X, Dict[str, Any]]:
     return core.DictCollector(
