@@ -1,5 +1,6 @@
 from __future__ import annotations
 import csv
+import json
 import asyncio
 import logging
 from jsonpath_ng import parse as parse_jsonpath
@@ -343,6 +344,21 @@ class JsonPathCollector(Collector[Any, Any]):
             match.value
             for match in self.jsonpath.find(item)
         ]
+
+
+@dataclass()
+class StoreCollector(Collector[Any, str]):
+    filename: Collector[Any, str]
+    mode: str = 'w+'
+    serializer: Callable[[Any], str] = json.dumps
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: Any) -> str:
+        filename = await self.filename(context, item)
+        with open(filename, self.mode) as output:
+            output.write(self.serializer(item))
+        return filename
+
 
 @dataclass()
 class CsvCollector(Collector[Sequence[Sequence[Any]], str]):
