@@ -15,11 +15,15 @@ from robot.collector.core import AsyncTapCollector as atap
 # noinspection PyUnresolvedReferences
 from robot.collector.core import AttrCollector as attr
 # noinspection PyUnresolvedReferences
+from robot.collector.core import ChainCollector as chain
+# noinspection PyUnresolvedReferences
 from robot.collector.core import ConstCollector as const
 # noinspection PyUnresolvedReferences
 from robot.collector.core import CssCollector as css
 # noinspection PyUnresolvedReferences
 from robot.collector.core import CsvCollector as csv
+# noinspection PyUnresolvedReferences
+from robot.collector.core import DictCsvCollector as dict_csv
 # noinspection PyUnresolvedReferences
 from robot.collector.core import DefaultCollector as default
 # noinspection PyUnresolvedReferences
@@ -34,6 +38,8 @@ from robot.collector.core import FnCollector as fn
 from robot.collector.core import GetCollector as get
 # noinspection PyUnresolvedReferences
 from robot.collector.core import JsonPathCollector as jsonpath
+# noinspection PyUnresolvedReferences
+from robot.collector.core import PagesCollector as pages
 # noinspection PyUnresolvedReferences
 from robot.collector.core import PipeCollector as pipe
 # noinspection PyUnresolvedReferences

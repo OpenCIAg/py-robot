@@ -1,4 +1,7 @@
 from __future__ import annotations
+import os
+from urllib.parse import urlparse
+from itertools import chain
 import csv
 import json
 import asyncio
@@ -288,6 +291,7 @@ class GetCollector(Collector[X, Y]):
 
 @dataclass()
 class UrlCollector(Collector[str, str]):
+    logger: Logger = field(default=__logger__, compare=False)
 
     async def __call__(self, context: Context, item: str) -> str:
         return context.resolve_url(item)
@@ -376,6 +380,29 @@ class CsvCollector(Collector[Sequence[Sequence[Any]], str]):
 
 
 @dataclass()
+class DictCsvCollector(Collector[Sequence[Dict[str, Any]], str]):
+    filename: Collector[Any, str]
+    fields: Sequence[str] = None
+    mode: str = 'w+'
+    csv_writer_factory = csv.DictWriter
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: Sequence[Dict[str, Any]]) -> str:
+        filename = await self.filename(context, item)
+        fields = self.fields
+        with open(filename, self.mode) as output:
+            iterable = iter(item)
+            first_item = next(iterable)
+            if fields is None:
+                fields = sorted(first_item.keys())
+            csv_writer = self.csv_writer_factory(output, fields)
+            csv_writer.writeheader()
+            csv_writer.writerow(first_item)
+            csv_writer.writerows(iterable)
+        return filename
+
+
+@dataclass()
 class TapCollector(Collector[X, X]):
     fn: Callable[[X], Any]
     logger: Logger = field(default=__logger__, compare=False)
@@ -395,12 +422,51 @@ class AsyncTapCollector(Collector[X, X]):
         return item
 
 
+class FileNameCollector(Collector[str, str]):
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: str) -> str:
+        parsed_url = urlparse(item)
+        path, filename = parsed_url.path.rsplit('/', 1)
+        path = os.path.join(os.getcwd(), path[1:])
+        os.makedirs(path, exist_ok=True)
+        return os.path.join(path, filename)
+
+
+FILE_NAME_COLLECTOR = FileNameCollector()
+
+
 @dataclass()
 class DownloadCollector(Collector[str, str]):
-    filename: Collector[Any, str]
+    filename: Collector[str, str] = field(default=FILE_NAME_COLLECTOR)
     logger: Logger = field(default=__logger__, compare=False)
 
     async def __call__(self, context: Context, item: str) -> str:
         filename = await self.filename(context, item)
         await context.download(item, filename)
         return filename
+
+
+@dataclass()
+class ChainCollector(Collector[Iterable[Iterable[X]], Iterable[X]]):
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: Iterable[Iterable[X]]) -> Iterable[X]:
+        return chain(*item)
+
+
+@dataclass()
+class PagesCollector(Collector[Any, Any]):
+    page_url_factory: Callable[[int], str]
+    total_pages_collector: Collector[Any, int]
+    collector: Collector[Any, Any]
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: Any) -> Any:
+        total_pages = int(await self.total_pages_collector(context, item))
+        urls = map(self.page_url_factory, range(1, total_pages + 1))
+        values = await asyncio.gather(*[
+            GetCollector(PipeCollector(ConstCollector(url), UrlCollector()), self.collector)(context, item)
+            for url in urls
+        ])
+        return chain(*values)

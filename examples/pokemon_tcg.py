@@ -1,0 +1,53 @@
+import json
+
+from robot import Robot
+from robot.collector.shortcut import *
+
+main_url = 'https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/'
+expansion_search_url = 'https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/{page}?{expansion}='
+
+expansion_collector = array(
+    pipe(
+        css('.expansions-category ul li input'),
+        attr('name'),
+    ),
+    fn(lambda it: (it, expansion_search_url.format(page=1, expansion=it),)),
+)
+
+with Robot() as robot:
+    result = robot.sync_run(expansion_collector, main_url)
+    print(json.dumps(list(result), indent=4))
+    for expansion_value, expansion_first_page in result[:1]:
+        page_collector = pipe(
+            pages(
+                lambda page: expansion_search_url.format(page=page, expansion=expansion_value),
+                pipe(
+                    css('#cards-load-more span'),
+                    as_text(),
+                    regex(r'\d+ of (\d+)'),
+                    fn(int),
+                ),
+                array(
+                    css('section.card-results ul.cards-grid li a[href]'),
+                    get(
+                        pipe(attr('href'), any(), url()),
+                        dict(
+                            url=pipe(context(), jsonpath('$.url'), any()),
+                            name=pipe(css('.card-description h1'), as_text()),
+                            type=pipe(css('.card-type'), as_text()),
+                            picture=pipe(
+                                css('.card-detail .card-image img'),
+                                attr('src'),
+                                any(),
+                                download(),
+                            )
+
+                        )
+                    )
+
+                )
+            ),
+            dict_csv(const('{}.csv'.format(expansion_value)))
+        )
+        page_result = robot.sync_run(page_collector, expansion_first_page)
+        print(json.dumps(page_result, indent=4))
