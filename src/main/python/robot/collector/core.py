@@ -291,12 +291,15 @@ class UrlCollector(Collector[str, str]):
         return context.resolve_url(item)
 
 
+@dataclass(init=False)
 class RegexCollector(Collector[str, str]):
+    logger: Logger = field(default=__logger__, compare=False)
 
-    def __init__(self, regex):
+    def __init__(self, regex, logger=__logger__):
         if isinstance(regex, (str,)):
             regex = re.compile(regex)
         self.regex = regex
+        self.logger = logger
 
     async def __call__(self, context: Context, item: str) -> Union[str, Sequence[str]]:
         match = self.regex.search(item)
