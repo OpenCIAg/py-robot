@@ -1,4 +1,5 @@
 from __future__ import annotations
+import csv
 import asyncio
 import logging
 from jsonpath_ng import parse as parse_jsonpath
@@ -342,6 +343,21 @@ class JsonPathCollector(Collector[Any, Any]):
             match.value
             for match in self.jsonpath.find(item)
         ]
+
+@dataclass()
+class CsvCollector(Collector[Sequence[Sequence[Any]], str]):
+    filename: Collector[Any, str]
+    mode: str = 'w+'
+    csv_writer_factory = csv.writer
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: Sequence[Sequence[Any]]) -> str:
+        filename = await self.filename(context, item)
+        with open(filename, self.mode) as output:
+            csv_writer = self.csv_writer_factory(output)
+            csv_writer.writerows(item)
+        return filename
+
 
 @dataclass()
 class TapCollector(Collector[X, X]):

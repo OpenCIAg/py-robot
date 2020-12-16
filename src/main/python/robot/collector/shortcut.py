@@ -19,6 +19,8 @@ from robot.collector.core import ConstCollector as const
 # noinspection PyUnresolvedReferences
 from robot.collector.core import CssCollector as css
 # noinspection PyUnresolvedReferences
+from robot.collector.core import CsvCollector as csv
+# noinspection PyUnresolvedReferences
 from robot.collector.core import DefaultCollector as default
 # noinspection PyUnresolvedReferences
 from robot.collector.core import DelayCollector as delay
