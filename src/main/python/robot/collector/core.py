@@ -331,3 +331,12 @@ class JsonPathCollector(Collector[Any, Any]):
             for match in self.jsonpath.find(item)
         ]
 
+@dataclass()
+class TapCollector(Collector[X, X]):
+    fn: Callable[[X], Any]
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: X) -> X:
+        self.fn(item)
+        return item
+

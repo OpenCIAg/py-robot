@@ -33,6 +33,8 @@ from robot.collector.core import PipeCollector as pipe
 # noinspection PyUnresolvedReferences
 from robot.collector.core import RegexCollector as regex
 # noinspection PyUnresolvedReferences
+from robot.collector.core import TapCollector as tap
+# noinspection PyUnresolvedReferences
 from robot.collector.core import TextCollector as text
 # noinspection PyUnresolvedReferences
 from robot.collector.core import TupleCollector as tuple
