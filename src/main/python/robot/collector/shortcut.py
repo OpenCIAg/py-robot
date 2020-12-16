@@ -27,6 +27,8 @@ from robot.collector.core import FnCollector as fn
 # noinspection PyUnresolvedReferences
 from robot.collector.core import GetCollector as get
 # noinspection PyUnresolvedReferences
+from robot.collector.core import JsonPathCollector as jsonpath
+# noinspection PyUnresolvedReferences
 from robot.collector.core import PipeCollector as pipe
 # noinspection PyUnresolvedReferences
 from robot.collector.core import RegexCollector as regex

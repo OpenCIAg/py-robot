@@ -1,6 +1,7 @@
 from __future__ import annotations
 import asyncio
 import logging
+from jsonpath_ng import parse as parse_jsonpath
 from dataclasses import dataclass, field
 from logging import Logger
 from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable, Union, Sequence
@@ -301,3 +302,19 @@ class RegexCollector(Collector[str, str]):
         elif groups:
             return groups[0]
         return match.group(0)
+@dataclass(init=False)
+class JsonPathCollector(Collector[Any, Any]):
+    logger: Logger = field(default=__logger__, compare=False)
+
+    def __init__(self, jsonpath, logger=__logger__):
+        if isinstance(jsonpath, (str,)):
+            jsonpath = parse_jsonpath(jsonpath)
+        self.jsonpath = jsonpath
+        self.logger = logger
+
+    async def __call__(self, context: Context, item: Any) -> Sequence[Any]:
+        return [
+            match.value
+            for match in self.jsonpath.find(item)
+        ]
+
