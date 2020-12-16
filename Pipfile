@@ -13,6 +13,7 @@ pytest-httpserver = "*"
 [packages]
 aiohttp = "*"
 pyquery = "*"
+jsonpath-ng = "*"
 
 [requires]
 python_version = "3.7"
