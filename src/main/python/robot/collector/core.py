@@ -2,11 +2,8 @@ from __future__ import annotations
 import os
 from urllib.parse import urlparse
 from itertools import chain
-import csv
-import json
 import asyncio
 import logging
-from jsonpath_ng import parse as parse_jsonpath
 from dataclasses import dataclass, field
 from logging import Logger
 from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable, Union, Sequence
@@ -202,15 +199,6 @@ class ObjectCollector(Collector[X, Y]):
 
 
 @dataclass()
-class CssCollector(Collector[XmlNode, XmlNode]):
-    css_selector: str
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: XmlNode) -> XmlNode:
-        return item.find_by_css(self.css_selector)
-
-
-@dataclass()
 class XPathCollector(Collector[XmlNode, XmlNode]):
     xpath: str
     logger: Logger = field(default=__logger__, compare=False)
@@ -276,20 +264,6 @@ class AnyCollector(Collector[Iterable[X], X]):
 
 
 @dataclass()
-class GetCollector(Collector[X, Y]):
-    url_collector: Collector[X, str]
-    collector: Collector[XmlNode, Y]
-
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: X) -> Y:
-        url = await self.url_collector(context, item)
-        sub_context, sub_item = await context.http_get(url)
-        result = await self.collector(sub_context, sub_item)
-        return result
-
-
-@dataclass()
 class UrlCollector(Collector[str, str]):
     logger: Logger = field(default=__logger__, compare=False)
 
@@ -333,92 +307,13 @@ class ContextCollector(Collector[Any, Dict[str, Any]]):
 CONTEXT = ContextCollector()
 
 
-@dataclass(init=False)
-class JsonPathCollector(Collector[Any, Any]):
-    logger: Logger = field(default=__logger__, compare=False)
-
-    def __init__(self, jsonpath, logger=__logger__):
-        if isinstance(jsonpath, (str,)):
-            jsonpath = parse_jsonpath(jsonpath)
-        self.jsonpath = jsonpath
-        self.logger = logger
-
-    async def __call__(self, context: Context, item: Any) -> Sequence[Any]:
-        return [
-            match.value
-            for match in self.jsonpath.find(item)
-        ]
-
-
-@dataclass()
-class StoreCollector(Collector[Any, str]):
-    filename: Collector[Any, str]
-    mode: str = 'w+'
-    serializer: Callable[[Any], str] = json.dumps
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: Any) -> str:
-        filename = await self.filename(context, item)
-        with open(filename, self.mode) as output:
-            output.write(self.serializer(item))
-        return filename
-
-
-@dataclass()
-class CsvCollector(Collector[Sequence[Sequence[Any]], str]):
-    filename: Collector[Any, str]
-    mode: str = 'w+'
-    csv_writer_factory = csv.writer
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: Sequence[Sequence[Any]]) -> str:
-        filename = await self.filename(context, item)
-        with open(filename, self.mode) as output:
-            csv_writer = self.csv_writer_factory(output)
-            csv_writer.writerows(item)
-        return filename
-
-
-@dataclass()
-class DictCsvCollector(Collector[Sequence[Dict[str, Any]], str]):
-    filename: Collector[Any, str]
-    fields: Sequence[str] = None
-    mode: str = 'w+'
-    csv_writer_factory = csv.DictWriter
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: Sequence[Dict[str, Any]]) -> str:
-        filename = await self.filename(context, item)
-        fields = self.fields
-        with open(filename, self.mode) as output:
-            iterable = iter(item)
-            first_item = next(iterable)
-            if fields is None:
-                fields = sorted(first_item.keys())
-            csv_writer = self.csv_writer_factory(output, fields)
-            csv_writer.writeheader()
-            csv_writer.writerow(first_item)
-            csv_writer.writerows(iterable)
-        return filename
-
-
 @dataclass()
 class TapCollector(Collector[X, X]):
-    fn: Callable[[X], Any]
+    fn: Collector[X, Any]
     logger: Logger = field(default=__logger__, compare=False)
 
     async def __call__(self, context: Context, item: X) -> X:
-        self.fn(item)
-        return item
-
-
-@dataclass()
-class AsyncTapCollector(Collector[X, X]):
-    fn: Callable[[X], Awaitable[Any]]
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: X) -> X:
-        await self.fn(item)
+        await self.fn(context, item)
         return item
 
 
@@ -437,17 +332,6 @@ FILE_NAME_COLLECTOR = FileNameCollector()
 
 
 @dataclass()
-class DownloadCollector(Collector[str, str]):
-    filename: Collector[str, str] = field(default=FILE_NAME_COLLECTOR)
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: str) -> str:
-        filename = await self.filename(context, item)
-        await context.download(item, filename)
-        return filename
-
-
-@dataclass()
 class ChainCollector(Collector[Iterable[Iterable[X]], Iterable[X]]):
     logger: Logger = field(default=__logger__, compare=False)
 
@@ -455,18 +339,16 @@ class ChainCollector(Collector[Iterable[Iterable[X]], Iterable[X]]):
         return chain(*item)
 
 
+CHAIN_COLLECTOR = ChainCollector()
+
+
 @dataclass()
-class PagesCollector(Collector[Any, Any]):
-    page_url_factory: Callable[[int], str]
-    total_pages_collector: Collector[Any, int]
-    collector: Collector[Any, Any]
+class FlatCollector(Collector[Iterable[Iterable[X]], List[X]]):
+
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: Any) -> Any:
-        total_pages = int(await self.total_pages_collector(context, item))
-        urls = map(self.page_url_factory, range(1, total_pages + 1))
-        values = await asyncio.gather(*[
-            GetCollector(PipeCollector(ConstCollector(url), UrlCollector()), self.collector)(context, item)
-            for url in urls
-        ])
-        return chain(*values)
+    async def __call__(self, context: Context, item: Iterable[Iterable[X]]) -> List[X]:
+        return list(chain(*item))
+
+
+FLAT_COLLECTOR = FlatCollector()

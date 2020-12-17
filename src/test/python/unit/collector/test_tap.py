@@ -9,7 +9,7 @@ class TapCollectorTest(AsyncTestCase):
     async def test_tap(self):
         value = 'any value'
         method = MagicMock()
-        collector = tap(method)
+        collector = tap(fn(method))
         result = await collector(None, value)
         self.assertIs(result, value)
         method.assert_called_with(value)

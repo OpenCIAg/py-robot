@@ -16,16 +16,17 @@ expansion_collector = array(
 
 with Robot() as robot:
     result = robot.sync_run(expansion_collector, main_url)
-    print(json.dumps(list(result), indent=4))
-    for expansion_value, expansion_first_page in result[:1]:
+    for expansion_value, expansion_first_page in result:
         page_collector = pipe(
-            pages(
-                lambda page: expansion_search_url.format(page=page, expansion=expansion_value),
-                pipe(
-                    css('#cards-load-more span'),
-                    as_text(),
-                    regex(r'\d+ of (\d+)'),
-                    fn(int),
+            get_many(
+                pages(
+                    lambda page: expansion_search_url.format(page=page, expansion=expansion_value),
+                    pipe(
+                        css('#cards-load-more span'),
+                        as_text(),
+                        regex(r'\d+ of (\d+)'),
+                        fn(int),
+                    )
                 ),
                 array(
                     css('section.card-results ul.cards-grid li a[href]'),
@@ -34,7 +35,7 @@ with Robot() as robot:
                         dict(
                             url=pipe(context(), jsonpath('$.url'), any()),
                             name=pipe(css('.card-description h1'), as_text()),
-                            type=pipe(css('.card-type'), as_text()),
+                            type=pipe(css('.card-type h2'), as_text()),
                             picture=pipe(
                                 css('.card-detail .card-image img'),
                                 attr('src'),
@@ -47,7 +48,8 @@ with Robot() as robot:
 
                 )
             ),
-            dict_csv(const('{}.csv'.format(expansion_value)))
+            flat(),
+            tap(dict_csv(const('{}.csv'.format(expansion_value)))),
         )
         page_result = robot.sync_run(page_collector, expansion_first_page)
-        print(json.dumps(page_result, indent=4))
+        print(json.dumps(list(page_result), indent=4))
