@@ -323,7 +323,7 @@ class FileNameCollector(Collector[str, str]):
     async def __call__(self, context: Context, item: str) -> str:
         parsed_url = urlparse(item)
         path, filename = parsed_url.path.rsplit('/', 1)
-        path = os.path.join(os.getcwd(), path[1:])
+        path = os.path.join('.', path[1:])
         os.makedirs(path, exist_ok=True)
         return os.path.join(path, filename)
 
@@ -344,7 +344,6 @@ CHAIN_COLLECTOR = ChainCollector()
 
 @dataclass()
 class FlatCollector(Collector[Iterable[Iterable[X]], List[X]]):
-
     logger: Logger = field(default=__logger__, compare=False)
 
     async def __call__(self, context: Context, item: Iterable[Iterable[X]]) -> List[X]:
