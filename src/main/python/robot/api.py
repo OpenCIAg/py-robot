@@ -48,7 +48,7 @@ class XmlNode(Iterable['XmlNode']):
     def cast_all(self, cast_fn: Callable[[XmlNode], Y]) -> Iterable[Y]:
         raise NotImplementedError()
 
-    def as_text(self) -> Iterable[str]:
+    def as_text(self) -> str:
         raise NotImplementedError()
 
     def attr(self, attr) -> Iterable[str]:
