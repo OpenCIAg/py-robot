@@ -3,12 +3,11 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass, field
-from itertools import chain
 from logging import Logger
 from typing import Any, AsyncIterable
 
 from robot.api import Collector, Context, XmlNode, X, Y
-from robot.collector.core import FILE_NAME_COLLECTOR, PipeCollector, ConstCollector, UrlCollector
+from robot.collector.core import PipeCollector, ConstCollector
 
 __logger__ = logging.getLogger(__name__)
 
@@ -28,17 +27,6 @@ class GetCollector(Collector[X, Y]):
 
 
 @dataclass()
-class DownloadCollector(Collector[str, str]):
-    filename: Collector[str, str] = field(default=FILE_NAME_COLLECTOR)
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: str) -> str:
-        filename = await self.filename(context, item)
-        await context.download(item, filename)
-        return filename
-
-
-@dataclass()
 class GetManyCollector(Collector[Any, Any]):
     urls: Collector[Any, AsyncIterable[str]]
     collector: Collector[Any, Any]
@@ -54,3 +42,11 @@ class GetManyCollector(Collector[Any, Any]):
             tasks.append(task)
         values = await asyncio.gather(*tasks)
         return values
+
+
+@dataclass()
+class UrlCollector(Collector[str, str]):
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: str) -> str:
+        return context.resolve_url(item)

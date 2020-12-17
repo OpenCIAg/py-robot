@@ -1,5 +1,5 @@
 from aiounittest import AsyncTestCase
-from robot.collector.core import Object
+from robot.collector.object import Object
 from robot.collector.shortcut import *
 
 

@@ -1,17 +1,16 @@
 from typing import Any, Dict
 
+from robot.collector import collections as _collections
+from robot.collector import object as _object
 from robot.api import Collector, X
-from robot.collector import core
+from robot.collector import core as _core
 # noinspection PyUnresolvedReferences
-from robot.collector.core import AnyCollector as any
+from robot.collector.collections import AnyCollector as any, \
+    FilterCollector as filter
 # noinspection PyUnresolvedReferences
 from robot.collector.core import ArrayCollector as array
 # noinspection PyUnresolvedReferences
-from robot.collector.core import AsTextCollector as as_text
-# noinspection PyUnresolvedReferences
 from robot.collector.core import AsyncFnCollector as afn
-# noinspection PyUnresolvedReferences
-from robot.collector.core import AttrCollector as attr
 # noinspection PyUnresolvedReferences
 from robot.collector.core import ConstCollector as const
 # noinspection PyUnresolvedReferences
@@ -19,54 +18,58 @@ from robot.collector.core import DefaultCollector as default
 # noinspection PyUnresolvedReferences
 from robot.collector.core import DelayCollector as delay
 # noinspection PyUnresolvedReferences
-from robot.collector.core import FilterCollector as filter
 # noinspection PyUnresolvedReferences
 from robot.collector.core import FnCollector as fn
 # noinspection PyUnresolvedReferences
 from robot.collector.core import PipeCollector as pipe
 # noinspection PyUnresolvedReferences
-from robot.collector.core import RegexCollector as regex
-# noinspection PyUnresolvedReferences
 from robot.collector.core import TapCollector as tap
 # noinspection PyUnresolvedReferences
-from robot.collector.core import TextCollector as text
 # noinspection PyUnresolvedReferences
 from robot.collector.core import TupleCollector as tuple
 # noinspection PyUnresolvedReferences
-from robot.collector.core import UrlCollector as url
-# noinspection PyUnresolvedReferences
-from robot.collector.core import XPathCollector as xpath
-# noinspection PyUnresolvedReferences
 from robot.collector.css import CssCollector as css
 # noinspection PyUnresolvedReferences
-from robot.collector.http import GetCollector as get, DownloadCollector as download, GetManyCollector as get_many
+from robot.collector.http import GetCollector as get, \
+    GetManyCollector as get_many, \
+    UrlCollector as url
+# noinspection PyUnresolvedReferences
+from robot.collector.io import DownloadCollector as download
 # noinspection PyUnresolvedReferences
 from robot.collector.json import JsonPathCollector as jsonpath
 # noinspection PyUnresolvedReferences
-# noinspection PyUnresolvedReferences
 from robot.collector.pagination import PagesUrlCollector as pages
 # noinspection PyUnresolvedReferences
-from robot.collector.store import StoreCollector as store, CsvCollector as csv, DictCsvCollector as dict_csv
+from robot.collector.store import StoreCollector as store, \
+    CsvCollector as csv, \
+    DictCsvCollector as dict_csv
+# noinspection PyUnresolvedReferences
+from robot.collector.text import RegexCollector as regex
+# noinspection PyUnresolvedReferences
+from robot.collector.xml import XPathCollector as xpath, \
+    AttrCollector as attr, \
+    AsTextCollector as as_text, \
+    TextCollector as text
 
-noop = lambda: core.NOOP_COLLECTOR
+noop = lambda: _core.NOOP_COLLECTOR
 
-context = lambda: core.CONTEXT
+context = lambda: _core.CONTEXT
 
-flat = lambda: core.FLAT_COLLECTOR
+flat = lambda: _collections.FLAT_COLLECTOR
 
-chain = lambda: core.CHAIN_COLLECTOR
+chain = lambda: _collections.CHAIN_COLLECTOR
 
 
 def dict(*args: Collector[X, Dict[str, Any]], **kwargs: Collector[X, Any]) -> Collector[X, Dict[str, Any]]:
-    return core.DictCollector(
+    return _core.DictCollector(
         args,
         kwargs
     )
 
 
-def obj(*args: Collector[X, Dict[str, Any]], **kwargs: Collector[X, Any]) -> Collector[X, core.Object]:
-    dict_collector = core.DictCollector(
+def obj(*args: Collector[X, Dict[str, Any]], **kwargs: Collector[X, Any]) -> Collector[X, _object.Object]:
+    dict_collector = _core.DictCollector(
         args,
         kwargs
     )
-    return core.ObjectCollector(dict_collector)
+    return _object.ObjectCollector(dict_collector)
