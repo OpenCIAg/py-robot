@@ -15,7 +15,7 @@ class AioHttpSessionAdapter(HttpSession):
         self.client_session = client_session
 
     async def download(self, url: str, filename: str):
-        async with self.client_session.get(url) as response:
+        async with self.client_session.get(url, allow_redirects=True) as response:
             if response.status != 200:
                 raise Exception()
             with open(filename, 'wb') as output:
