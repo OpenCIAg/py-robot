@@ -71,6 +71,8 @@ release:
 
 code-climate-coverage:
   stage: report
+  only:
+    - master
   cache:
     key: code-climate
   script:
