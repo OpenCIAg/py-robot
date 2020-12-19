@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "embedme": "^1.22.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "build": "embedme **/*.md",
+    "test": "embedme --verify **/*.md"
+  }
+}

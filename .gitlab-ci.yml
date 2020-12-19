@@ -34,6 +34,18 @@ prepare-env:
       - requirements.txt
       - requirements-dev.txt
 
+verify-readme:
+  stage: test
+  image: node:lts-alpine
+  cache:
+    key: node
+    paths:
+      - node_modules
+  before_script:
+    - npm i
+  script:
+    - npm run test
+
 test:
   stage: test
   script:
