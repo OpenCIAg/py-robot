@@ -2,9 +2,8 @@ import asyncio
 import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from typing import List
 
-from robot.api import Robot, Collector, XmlNode, Y, Context
+from robot.api import Robot, Collector, Y, Context
 from robot.context.core import ContextImpl
 
 
