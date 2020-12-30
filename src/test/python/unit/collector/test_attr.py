@@ -21,9 +21,9 @@ class AttrCollectorTest(AsyncTestCase):
 
     async def test_get_link(self):
         xml_engine = PyQueryAdapter()
-        collector = array(
+        collector = pipe(
             css('ul > li > a'),
-            attr('href'),
+            foreach(attr('href')),
         )
         html = xml_engine(raw_html)
         expected = [['//fuu1'], ['//fuu2']]

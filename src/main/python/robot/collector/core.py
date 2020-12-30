@@ -122,21 +122,6 @@ class AsyncForeachCollector(Collector[AsyncIterable[X], Sequence[Y]]):
         return context, list(map(lambda it: it[1], values))
 
 
-@dataclass()
-class ArrayCollector(Collector[X, List[Y]]):
-    splitter: Collector[X, Iterable[Any]]
-    item_collector: Collector[Any, Y] = NOOP_COLLECTOR
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: X) -> Tuple[Context, Iterable[Y]]:
-        context, sub_items = await self.splitter(context, item)
-        collected_items = await asyncio.gather(*[
-            self.item_collector(context, sub_item)
-            for sub_item in sub_items
-        ])
-        return context, list(map(lambda it: it[1], collected_items))
-
-
 @dataclass(init=False)
 class TupleCollector(Collector[X, Tuple]):
     collectors: Tuple[Collector[X, Any]]

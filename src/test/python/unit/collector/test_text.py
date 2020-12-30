@@ -21,9 +21,9 @@ class TextCollectorTest(AsyncTestCase):
 
     async def test_get_link_text(self):
         xml_engine = PyQueryAdapter()
-        collector = array(
+        collector = pipe(
             css('ul > li > a'),
-            text(),
+            foreach(text()),
         )
         html = xml_engine(raw_html)
         expected = [['Fuu 1'], ['Fuu 2']]

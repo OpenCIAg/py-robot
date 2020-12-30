@@ -21,12 +21,12 @@ class DefaultCollectorTest(AsyncTestCase):
 
     async def test_get_link_or_text(self):
         xml_engine = PyQueryAdapter()
-        collector = array(
+        collector = pipe(
             css('ul > li > a'),
-            default(
+            foreach(default(
                 attr('href'),
                 text(),
-            )
+            ))
         )
         html = xml_engine(raw_html)
         expected = [['//fuu'], ['unknown']]

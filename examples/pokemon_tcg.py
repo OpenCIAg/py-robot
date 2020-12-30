@@ -12,13 +12,9 @@ expansion_search_url = 'https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/{pa
 expansion_collector = pipe(
     const(main_url),
     get(),
-    array(
-        pipe(
-            css('.expansions-category ul li input'),
-            attr('name'),
-        ),
-        fn(lambda it: (it, expansion_search_url.format(page=1, expansion=it),)),
-    )
+    css('.expansions-category ul li input'),
+    attr('name'),
+    foreach(fn(lambda it: (it, expansion_search_url.format(page=1, expansion=it),))),
 )
 
 with Robot() as robot:
@@ -35,9 +31,8 @@ with Robot() as robot:
             foreach(pipe(
                 fn(lambda page: expansion_search_url.format(page=page, expansion=expansion_value)),
                 get(),
-                array(
-                    css('section.card-results ul.cards-grid li a[href]'),
-                    pipe(
+                css('section.card-results ul.cards-grid li a[href]'),
+                foreach(pipe(
                         attr('href'), any(), url(),
                         get(),
                         dict(
@@ -50,10 +45,8 @@ with Robot() as robot:
                                 any(),
                                 download(),
                             )
-
                         )
-                    )
-                )
+                ))
             )),
             flat(),
             tap(dict_csv(const('{}.csv'.format(expansion_value)))),

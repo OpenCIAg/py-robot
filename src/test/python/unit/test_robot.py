@@ -84,14 +84,12 @@ class RobotTest(AsyncTestCase):
                 get(),
                 css('a[href]'), attr('href'), any(),
                 get(),
-                array(
-                    css('ul > li > a[href]'),
-                    pipe(
-                        attr('href'), any(),
-                        get(),
-                        css('#main p'), as_text(),
-                    )
-                )
+                css('ul > li > a[href]'),
+                foreach(pipe(
+                    attr('href'), any(),
+                    get(),
+                    css('#main p'), as_text(),
+                ))
             )
             result = await self.robot.run(collector)
             expected = [

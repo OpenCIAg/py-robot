@@ -8,8 +8,6 @@ from robot.collector import object as _object
 from robot.collector.collections import AnyCollector as any, \
     FilterCollector as filter
 # noinspection PyUnresolvedReferences
-from robot.collector.core import ArrayCollector as array
-# noinspection PyUnresolvedReferences
 from robot.collector.core import AsyncFnCollector as afn
 # noinspection PyUnresolvedReferences
 from robot.collector.core import AsyncForeachCollector as aforeach
