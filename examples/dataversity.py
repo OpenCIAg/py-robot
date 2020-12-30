@@ -1,13 +1,15 @@
 from robot import Robot
 from robot.collector.shortcut import *
 
-collector = get(
+collector = pipe(
     const('http://www.dataversity.net/category/education/daily-data/'),
+    get(),
     array(
         css('#primary article'),
         dict(
-            get(
-                pipe(css('a[href]'), attr('href'), any(), url()),
+            pipe(
+                css('a[href]'), attr('href'), any(), url(),
+                get(),
                 dict(
                     body=pipe(css('.entry-content p'), as_text())
                 )

@@ -8,5 +8,5 @@ class ConstCollectorTest(AsyncTestCase):
     async def test_const(self):
         any_value = 'any value'
         collector = const(any_value)
-        result = await collector(None, None)
+        _, result = await collector(None, None)
         self.assertEqual(result, any_value)

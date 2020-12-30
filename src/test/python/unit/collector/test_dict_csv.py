@@ -17,7 +17,7 @@ class DictCsvCollectorTest(AsyncTestCase):
         collector = dict_csv(
             const(file.name)
         )
-        result = await collector(None, [
+        _, result = await collector(None, [
             {'a': 1, 'b': 2, 'c': 3},
             {'a': 3, 'b': 2, 'c': 1},
         ])

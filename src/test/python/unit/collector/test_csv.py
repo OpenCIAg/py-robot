@@ -17,7 +17,7 @@ class CsvCollectorTest(AsyncTestCase):
         collector = csv(
             const(file.name)
         )
-        result = await collector(None, [
+        _, result = await collector(None, [
             ['a', 'b', 'c'],
             [1, 2, 3],
             [3, 2, 1],

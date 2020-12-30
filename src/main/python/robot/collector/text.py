@@ -2,7 +2,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import Union, Sequence
+from typing import Union, Sequence, Tuple, Dict
 
 from robot.api import Collector, Context
 
@@ -19,16 +19,16 @@ class RegexCollector(Collector[str, str]):
         self.regex = regex
         self.logger = logger
 
-    async def __call__(self, context: Context, item: str) -> Union[str, Sequence[str]]:
+    async def __call__(self, context: Context, item: str) -> Tuple[Context, Union[str, Sequence[str], Dict]]:
         match = self.regex.search(item)
         if not match:
-            return None
+            return context, None
         group_dict = match.groupdict()
         if group_dict:
-            return group_dict
+            return context, group_dict
         groups = match.groups()
         if len(groups) > 1:
-            return groups
+            return context, groups
         elif groups:
-            return groups[0]
-        return match.group(0)
+            return context, groups[0]
+        return context, match.group(0)

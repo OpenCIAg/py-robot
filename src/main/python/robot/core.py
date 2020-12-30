@@ -34,7 +34,8 @@ class RobotImpl(Robot):
         self._thread_poll.__exit__(exc_type, exc_val, exc_tb)
 
     async def run(self, collector: Collector[None, Y]) -> Y:
-        return await collector(self.context, None)
+        _, result = await collector(self.context, None)
+        return result
 
     def sync_run(self, collector: Collector[None, Y]) -> Y:
         return self._loop.run_until_complete(self.run(collector))

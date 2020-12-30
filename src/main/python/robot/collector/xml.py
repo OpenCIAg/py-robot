@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import Iterable
+from typing import Iterable, Tuple
 
 from robot.api import Collector, XmlNode, Context
 
@@ -13,8 +13,8 @@ class XPathCollector(Collector[XmlNode, XmlNode]):
     xpath: str
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: XmlNode) -> XmlNode:
-        return item.find_by_xpath(self.xpath)
+    async def __call__(self, context: Context, item: XmlNode) -> Tuple[Context, XmlNode]:
+        return context, item.find_by_xpath(self.xpath)
 
 
 @dataclass()
@@ -22,8 +22,8 @@ class AttrCollector(Collector[XmlNode, Iterable[str]]):
     attr: str
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: XmlNode) -> Iterable[str]:
-        return [
+    async def __call__(self, context: Context, item: XmlNode) -> Tuple[Context, Iterable[str]]:
+        return context, [
             value
             for value in item.attr(self.attr)
         ]
@@ -35,8 +35,8 @@ class AsTextCollector(Collector[XmlNode, str]):
     suffix: str = ''
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: XmlNode) -> str:
-        return self.prefix + item.as_text() + self.suffix
+    async def __call__(self, context: Context, item: XmlNode) -> Tuple[Context, str]:
+        return context, self.prefix + item.as_text() + self.suffix
 
 
 @dataclass()
@@ -45,8 +45,8 @@ class TextCollector(Collector[XmlNode, Iterable[str]]):
     suffix: str = ''
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: XmlNode) -> Iterable[str]:
-        return [
+    async def __call__(self, context: Context, item: XmlNode) -> Tuple[Context, Iterable[str]]:
+        return context, [
             self.prefix + value + self.suffix
             for value in item.text()
         ]

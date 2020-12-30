@@ -24,7 +24,7 @@ class DownloadCollectorTest(AsyncTestCase):
                 response_data=h1_hello
             )
             url = server.url_for('/')
-            result = await collector(context, url)
+            _, result = await collector(context, url)
         self.assertEqual(result, file.name)
         with open(file.name, 'rb') as input_stream:
             self.assertEqual(h1_hello, input_stream.read())

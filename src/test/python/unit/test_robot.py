@@ -79,16 +79,17 @@ class RobotTest(AsyncTestCase):
         http_server = HTTPServer()
         http_server = prepare_server(http_server)
         with http_server as server:
-            collector = get(
+            collector = pipe(
                 const(server.url_for('/')),
-                get(
-                    pipe(css('a[href]'), attr('href'), any(), ),
-                    array(
-                        css('ul > li > a[href]'),
-                        get(
-                            pipe(attr('href'), any()),
-                            pipe(css('#main p'), as_text()),
-                        )
+                get(),
+                css('a[href]'), attr('href'), any(),
+                get(),
+                array(
+                    css('ul > li > a[href]'),
+                    pipe(
+                        attr('href'), any(),
+                        get(),
+                        css('#main p'), as_text(),
                     )
                 )
             )

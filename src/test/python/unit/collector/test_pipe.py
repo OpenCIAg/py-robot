@@ -18,5 +18,5 @@ class PipeCollectorTest(AsyncTestCase):
         )
         html = xml_engine('<table><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>')
         expected = ['2', '4']
-        result = await collector(None, html)
+        _, result = await collector(None, html)
         self.assertEqual(expected, list(result))

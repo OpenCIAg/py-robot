@@ -27,5 +27,5 @@ class TextCollectorTest(AsyncTestCase):
         )
         html = xml_engine(raw_html)
         expected = [['Fuu 1'], ['Fuu 2']]
-        result = await collector(None, html)
+        _, result = await collector(None, html)
         self.assertEqual(expected, list(result))

@@ -77,7 +77,7 @@ class Context(object):
 
 class Collector(Generic[X, Y]):
 
-    async def __call__(self, context: Context, item: X) -> Y:
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, Y]:
         raise NotImplementedError()
 
 

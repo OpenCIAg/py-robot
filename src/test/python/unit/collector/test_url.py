@@ -12,6 +12,6 @@ class UrlCollectorTest(AsyncTestCase):
         context = Mock()
         context.resolve_url = MagicMock(return_value=expected)
         collector = url()
-        result = await collector(context, any_value)
+        _, result = await collector(context, any_value)
         self.assertEqual(result, expected)
         context.resolve_url.assert_called_with(any_value)

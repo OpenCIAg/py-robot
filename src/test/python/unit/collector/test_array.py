@@ -29,7 +29,7 @@ class ArrayCollectorTest(AsyncTestCase):
         )
         html = xml_engine(raw_html)
         expected = ['2', '4']
-        result = await collector(None, html)
+        _, result = await collector(None, html)
         self.assertEqual(expected, list(result))
 
     async def test_tr_with_xpath(self):
@@ -40,5 +40,5 @@ class ArrayCollectorTest(AsyncTestCase):
         )
         html = xml_engine(raw_html)
         expected = ['2', '4']
-        result = await collector(None, html)
+        _, result = await collector(None, html)
         self.assertEqual(expected, list(result))

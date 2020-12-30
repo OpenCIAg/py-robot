@@ -17,7 +17,7 @@ class StoreCollectorTest(AsyncTestCase):
         collector = store(
             const(file.name)
         )
-        result = await collector(None, obj)
+        _, result = await collector(None, obj)
         self.assertEqual(file.name, result)
         with open(file.name) as input_stream:
             read_content = json.loads(input_stream.read())

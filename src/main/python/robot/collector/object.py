@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import Dict, Callable, Any
+from typing import Dict, Callable, Any, Tuple
 
 from robot.api import Collector, X, Y, Context
 from robot.collector.core import DictCollector
@@ -38,7 +38,7 @@ class ObjectCollector(Collector[X, Y]):
     cast: Callable[[Dict[str, Any]], Y] = field(default=Object.from_dict)
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: X) -> Dict[str, Any]:
-        value = await self.dict_collector(context, item)
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, Y]:
+        context, value = await self.dict_collector(context, item)
         result = self.cast(value)
-        return result
+        return context, result

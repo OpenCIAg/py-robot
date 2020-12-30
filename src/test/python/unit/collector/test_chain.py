@@ -15,5 +15,5 @@ class ChainCollectorTest(AsyncTestCase):
         ]
         expected = range(10)
         collector = chain()
-        result = await collector(None, item)
+        _, result = await collector(None, item)
         self.assertEqual(list(result), list(expected))

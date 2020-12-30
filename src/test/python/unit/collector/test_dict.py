@@ -14,7 +14,7 @@ class DictCollectorTest(AsyncTestCase):
             a=const(1),
             b=const('2')
         )
-        result = await collector(None, None)
+        _, result = await collector(None, None)
         self.assertEqual(result, expected)
 
     async def test_const_in_nested_collectors(self):
@@ -26,7 +26,7 @@ class DictCollectorTest(AsyncTestCase):
             const({'a': 1}),
             const({'b': '2'}),
         )
-        result = await collector(None, None)
+        _, result = await collector(None, None)
         self.assertEqual(result, expected)
 
     async def test_const_mixed(self):
@@ -38,5 +38,5 @@ class DictCollectorTest(AsyncTestCase):
             const({'a': 1}),
             b=const('2'),
         )
-        result = await collector(None, None)
+        _, result = await collector(None, None)
         self.assertEqual(result, expected)

@@ -20,10 +20,10 @@ class PipeCollector(Collector[Any, Any]):
         self.collectors = collectors
         self.logger = logger
 
-    async def __call__(self, context: Context, item: Any) -> Any:
+    async def __call__(self, context: Context, item: Any) -> Tuple[Context, Any]:
         for collector in self.collectors:
-            item = await collector(context, item)
-        return item
+            context, item = await collector(context, item)
+        return context, item
 
 
 @dataclass(init=False)
@@ -49,12 +49,12 @@ class DefaultCollector(Collector[Any, Any]):
             return True
         return False
 
-    async def __call__(self, context: Context, item: Any) -> Any:
+    async def __call__(self, context: Context, item: Any) -> Tuple[Context, Any]:
         for collector in self.collectors:
-            result = await collector(context, item)
+            context, result = await collector(context, item)
             if not self.is_empty(result):
-                return result
-        return None
+                return context, result
+        return context, None
 
 
 @dataclass()
@@ -62,8 +62,8 @@ class FnCollector(Collector[X, Y]):
     fn: Callable[[X], Y]
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: X) -> Y:
-        return self.fn(item)
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, Y]:
+        return context, self.fn(item)
 
 
 @dataclass()
@@ -71,16 +71,16 @@ class AsyncFnCollector(Collector[X, Y]):
     fn: Callable[[X], Awaitable[Y]]
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: X) -> Y:
-        return await self.fn(item)
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, Y]:
+        return context, await self.fn(item)
 
 
 @dataclass()
 class NoopCollector(Collector[X, X]):
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: X) -> X:
-        return item
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, X]:
+        return context, item
 
 
 NOOP_COLLECTOR = NoopCollector()
@@ -91,8 +91,8 @@ class ConstCollector(Collector[Any, Y]):
     value: Y
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: Any) -> Y:
-        return self.value
+    async def __call__(self, context: Context, item: Any) -> Tuple[Context, Y]:
+        return context, self.value
 
 
 @dataclass()
@@ -101,13 +101,13 @@ class ArrayCollector(Collector[X, List[Y]]):
     item_collector: Collector[Any, Y] = NOOP_COLLECTOR
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: X) -> Iterable[Y]:
-        sub_items = await self.splitter(context, item)
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, Iterable[Y]]:
+        context, sub_items = await self.splitter(context, item)
         collected_items = await asyncio.gather(*[
             self.item_collector(context, sub_item)
             for sub_item in sub_items
         ])
-        return collected_items
+        return context, list(map(lambda it: it[1], collected_items))
 
 
 @dataclass(init=False)
@@ -119,12 +119,12 @@ class TupleCollector(Collector[X, Tuple]):
         self.collectors = collectors
         self.logger = logger
 
-    async def __call__(self, context: Context, item: X) -> Tuple:
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, Tuple]:
         collected_items = await asyncio.gather(*[
             collector(context, item)
             for collector in self.collectors
         ])
-        return collected_items
+        return context, tuple(map(lambda it: it[1], collected_items))
 
 
 @dataclass()
@@ -132,9 +132,9 @@ class DelayCollector(Collector[X, X]):
     delay: float
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: X) -> X:
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, X]:
         await asyncio.sleep(self.delay)
-        return item
+        return context, item
 
 
 @dataclass()
@@ -143,31 +143,32 @@ class DictCollector(Collector[X, Dict[str, Any]]):
     field_collectors: Dict[str, Collector[X, Any]] = field(default_factory=dict)
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: X) -> Dict[str, Any]:
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, Dict[str, Any]]:
         obj = dict()
         collected_items = await asyncio.gather(*[
             collector(context, item)
             for collector in self.nested_collectors
         ])
-        for collected_item in collected_items:
+        for _, collected_item in collected_items:
             obj.update(collected_item)
         if not self.field_collectors:
-            return obj
+            return context, obj
         keys, collectors = zip(*self.field_collectors.items())
         values = await asyncio.gather(*[
             collector(context, item)
             for collector in collectors
         ])
+        values = map(lambda it: it[1], values)
         obj.update(dict(zip(keys, values)))
-        return obj
+        return context, obj
 
 
 @dataclass()
 class ContextCollector(Collector[Any, Dict[str, Any]]):
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: Any) -> Context:
-        return dict(context)
+    async def __call__(self, context: Context, item: Any) -> Tuple[Context, Dict[str, Any]]:
+        return context, dict(context)
 
 
 CONTEXT = ContextCollector()
@@ -178,6 +179,6 @@ class TapCollector(Collector[X, X]):
     fn: Collector[X, Any]
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: X) -> X:
+    async def __call__(self, context: Context, item: X) -> Tuple[Context, X]:
         await self.fn(context, item)
-        return item
+        return context, item

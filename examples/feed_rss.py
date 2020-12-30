@@ -5,8 +5,9 @@ from robot.collector.shortcut import *
 
 url = 'https://elvisfusco.com.br/feed/'
 
-collector = get(
+collector = pipe(
     const(url),
+    get(),
     array(
         css('item'),
         dict(
@@ -14,9 +15,10 @@ collector = get(
             author=pipe(css('author'), as_text()),
             description=pipe(css('description'), as_text()),
             link=pipe(css('link'), as_text()),
-            link_title=get(
-                pipe(css('link'), as_text()),
-                pipe(css('title'), as_text()),
+            link_title=pipe(
+                css('link'), as_text(),
+                get(),
+                css('title'), as_text(),
             ),
             tags=pipe(css('category'), text()),
         )

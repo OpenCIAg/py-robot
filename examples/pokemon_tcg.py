@@ -6,8 +6,9 @@ from robot.collector.shortcut import *
 main_url = 'https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/'
 expansion_search_url = 'https://www.pokemon.com/us/pokemon-tcg/pokemon-cards/{page}?{expansion}='
 
-expansion_collector = get(
+expansion_collector = pipe(
     const(main_url),
+    get(),
     array(
         pipe(
             css('.expansions-category ul li input'),
@@ -20,8 +21,9 @@ expansion_collector = get(
 with Robot() as robot:
     result = robot.sync_run(expansion_collector)
     for expansion_value, expansion_first_page in result:
-        page_collector = get(
+        page_collector = pipe(
             const(expansion_first_page),
+            get(),
             pipe(
                 get_many(
                     pages(
@@ -35,8 +37,9 @@ with Robot() as robot:
                     ),
                     array(
                         css('section.card-results ul.cards-grid li a[href]'),
-                        get(
-                            pipe(attr('href'), any(), url()),
+                        pipe(
+                            attr('href'), any(), url(),
+                            get(),
                             dict(
                                 url=pipe(context(), jsonpath('$.url'), any()),
                                 name=pipe(css('.card-description h1'), as_text()),

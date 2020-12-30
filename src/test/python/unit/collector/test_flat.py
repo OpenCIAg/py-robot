@@ -15,5 +15,5 @@ class FlatCollectorTest(AsyncTestCase):
         ]
         expected = list(range(10))
         collector = flat()
-        result = await collector(None, item)
+        _, result = await collector(None, item)
         self.assertEqual(result, expected)

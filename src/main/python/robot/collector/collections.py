@@ -2,7 +2,7 @@ import logging
 from dataclasses import dataclass, field
 from itertools import chain
 from logging import Logger
-from typing import Iterable, List, Callable
+from typing import Iterable, List, Callable, Tuple
 
 from robot.api import Collector, X, Context
 
@@ -13,8 +13,8 @@ __logger__ = logging.getLogger(__name__)
 class FlatCollector(Collector[Iterable[Iterable[X]], List[X]]):
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: Iterable[Iterable[X]]) -> List[X]:
-        return list(chain(*item))
+    async def __call__(self, context: Context, item: Iterable[Iterable[X]]) -> Tuple[Context, List[X]]:
+        return context, list(chain(*item))
 
 
 FLAT_COLLECTOR = FlatCollector()
@@ -24,8 +24,8 @@ FLAT_COLLECTOR = FlatCollector()
 class ChainCollector(Collector[Iterable[Iterable[X]], Iterable[X]]):
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: Iterable[Iterable[X]]) -> Iterable[X]:
-        return chain(*item)
+    async def __call__(self, context: Context, item: Iterable[Iterable[X]]) -> Tuple[Context,Iterable[X]]:
+        return context, chain(*item)
 
 
 CHAIN_COLLECTOR = ChainCollector()
@@ -35,8 +35,8 @@ CHAIN_COLLECTOR = ChainCollector()
 class AnyCollector(Collector[Iterable[X], X]):
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: Iterable[X]) -> X:
-        return next(iter(item))
+    async def __call__(self, context: Context, item: Iterable[X]) -> Tuple[Context, X]:
+        return context, next(iter(item))
 
 
 @dataclass()
@@ -44,8 +44,8 @@ class FilterCollector(Collector):
     predicate: Callable[[X], bool]
     logger: Logger = field(default=__logger__, compare=False)
 
-    async def __call__(self, context: Context, item: Iterable) -> Iterable:
-        return [
+    async def __call__(self, context: Context, item: Iterable) -> Tuple[Context, Iterable]:
+        return context, [
             value
             for value in item
             if self.predicate(value)

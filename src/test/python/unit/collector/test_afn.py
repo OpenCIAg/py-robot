@@ -12,5 +12,5 @@ class AsyncFnCollectorTest(AsyncTestCase):
             return any_value
 
         collector = afn(async_fn)
-        result = await collector(None, None)
+        _, result = await collector(None, None)
         self.assertEqual(result, any_value)

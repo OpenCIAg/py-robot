@@ -6,7 +6,7 @@ from typing import Any, Sequence
 from jsonpath_ng import parse as parse_jsonpath
 
 from robot.api import Collector, Context
-
+from typing import Tuple
 __logger__ = logging.getLogger(__name__)
 
 
@@ -20,8 +20,8 @@ class JsonPathCollector(Collector[Any, Any]):
         self.jsonpath = jsonpath
         self.logger = logger
 
-    async def __call__(self, context: Context, item: Any) -> Sequence[Any]:
-        return [
+    async def __call__(self, context: Context, item: Any) -> Tuple[Context, Sequence[Any]]:
+        return context, [
             match.value
             for match in self.jsonpath.find(item)
         ]

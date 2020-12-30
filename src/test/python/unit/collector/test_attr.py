@@ -27,5 +27,5 @@ class AttrCollectorTest(AsyncTestCase):
         )
         html = xml_engine(raw_html)
         expected = [['//fuu1'], ['//fuu2']]
-        result = await collector(None, html)
+        _, result = await collector(None, html)
         self.assertEqual(expected, list(result))
