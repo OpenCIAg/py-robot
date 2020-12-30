@@ -1,8 +1,9 @@
+from typing import Iterable, Iterator
+
 from aiounittest import AsyncTestCase
 
 from robot.collector.shortcut import *
 from robot.xml_engine.pyquery_engine import PyQueryAdapter
-from robot.collector.pagination import AsyncIterableAdapter
 
 raw_html = b"""
 <html>
@@ -18,6 +19,22 @@ raw_html = b"""
     </table>
 </htm>
 """
+
+
+class AsyncIterableAdapter(object):
+    iterator: Iterator[X]
+
+    def __init__(self, iterable: Iterable[X]):
+        self.iterator = iter(iterable)
+
+    async def __anext__(self):
+        try:
+            return next(self.iterator)
+        except StopIteration:
+            raise StopAsyncIteration
+
+    def __aiter__(self) -> 'self':
+        return self
 
 
 class AsyncForeachCollectorTest(AsyncTestCase):

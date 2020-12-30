@@ -27,16 +27,13 @@ with Robot() as robot:
         page_collector = pipe(
             const(expansion_first_page),
             get(),
-            pages(
-                lambda page: expansion_search_url.format(page=page, expansion=expansion_value),
-                pipe(
-                    css('#cards-load-more span'),
-                    as_text(),
-                    regex(r'\d+ of (\d+)'),
-                    fn(int),
-                )
-            ),
-            aforeach(pipe(
+            css('#cards-load-more span'),
+            as_text(),
+            regex(r'\d+ of (\d+)'),
+            fn(int),
+            fn(lambda total_pages: range(1, total_pages + 1)),
+            foreach(pipe(
+                fn(lambda page: expansion_search_url.format(page=page, expansion=expansion_value)),
                 get(),
                 array(
                     css('section.card-results ul.cards-grid li a[href]'),

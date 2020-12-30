@@ -41,8 +41,6 @@ from robot.collector.io import DownloadCollector as download
 # noinspection PyUnresolvedReferences
 from robot.collector.json import JsonPathCollector as jsonpath
 # noinspection PyUnresolvedReferences
-from robot.collector.pagination import PagesUrlCollector as pages
-# noinspection PyUnresolvedReferences
 from robot.collector.store import StoreCollector as store, \
     CsvCollector as csv, \
     DictCsvCollector as dict_csv
