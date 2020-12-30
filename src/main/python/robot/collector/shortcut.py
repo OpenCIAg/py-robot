@@ -35,7 +35,6 @@ from robot.collector.core import TupleCollector as tuple
 from robot.collector.css import CssCollector as css
 # noinspection PyUnresolvedReferences
 from robot.collector.http import GetCollector as get, \
-    GetManyCollector as get_many, \
     UrlCollector as url
 # noinspection PyUnresolvedReferences
 from robot.collector.io import DownloadCollector as download
