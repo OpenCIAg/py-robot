@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import Any, AsyncIterable
 
-from robot.api import Collector, Context, XmlNode, Tuple, X, Y
-from robot.collector.core import PipeCollector, ConstCollector
+from robot.api import Collector, Context, XmlNode, Tuple
 
 __logger__ = logging.getLogger(__name__)
 
