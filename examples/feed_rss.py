@@ -8,21 +8,19 @@ url = 'https://elvisfusco.com.br/feed/'
 collector = pipe(
     const(url),
     get(),
-    array(
-        css('item'),
-        dict(
-            title=pipe(css('title'), as_text()),
-            author=pipe(css('author'), as_text()),
-            description=pipe(css('description'), as_text()),
-            link=pipe(css('link'), as_text()),
-            link_title=pipe(
-                css('link'), as_text(),
-                get(),
-                css('title'), as_text(),
-            ),
-            tags=pipe(css('category'), text()),
-        )
-    )
+    css('item'),
+    foreach(dict(
+        title=pipe(css('title'), as_text()),
+        author=pipe(css('author'), as_text()),
+        description=pipe(css('description'), as_text()),
+        link=pipe(css('link'), as_text()),
+        link_title=pipe(
+            css('link'), as_text(),
+            get(),
+            css('title'), as_text(),
+        ),
+        tags=pipe(css('category'), text()),
+    ))
 )
 
 with Robot() as robot:
