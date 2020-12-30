@@ -1,9 +1,9 @@
 from typing import Any, Dict
 
-from robot.collector import collections as _collections
-from robot.collector import object as _object
 from robot.api import Collector, X
+from robot.collector import collections as _collections
 from robot.collector import core as _core
+from robot.collector import object as _object
 # noinspection PyUnresolvedReferences
 from robot.collector.collections import AnyCollector as any, \
     FilterCollector as filter
@@ -20,6 +20,8 @@ from robot.collector.core import DelayCollector as delay
 # noinspection PyUnresolvedReferences
 # noinspection PyUnresolvedReferences
 from robot.collector.core import FnCollector as fn
+# noinspection PyUnresolvedReferences
+from robot.collector.core import ForeachCollector as foreach
 # noinspection PyUnresolvedReferences
 from robot.collector.core import PipeCollector as pipe
 # noinspection PyUnresolvedReferences

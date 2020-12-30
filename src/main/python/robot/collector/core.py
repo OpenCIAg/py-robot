@@ -4,7 +4,7 @@ import asyncio
 import logging
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable
+from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable, AsyncIterable, Sequence
 
 from robot.api import Collector, Context, X, Y
 
@@ -93,6 +93,18 @@ class ConstCollector(Collector[Any, Y]):
 
     async def __call__(self, context: Context, item: Any) -> Tuple[Context, Y]:
         return context, self.value
+
+
+@dataclass()
+class ForeachCollector(Collector[Sequence[X], Sequence[Y]]):
+    collector: Collector[X, Y]
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: Sequence[X]) -> Tuple[Context, Sequence[Y]]:
+        collected_items = await asyncio.gather(*[
+            self.collector(context, i) for i in item
+        ])
+        return context, list(map(lambda it: it[1], collected_items))
 
 
 @dataclass()
