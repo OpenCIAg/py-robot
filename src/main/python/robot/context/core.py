@@ -6,6 +6,11 @@ from dataclasses import dataclass, field
 from typing import Tuple, Any, Dict
 from urllib.parse import urlparse
 
+import logging
+from logging import Logger
+
+__logger__ = logging.getLogger(__name__)
+
 
 @dataclass()
 class ContextImpl(Context):
@@ -14,6 +19,7 @@ class ContextImpl(Context):
     url: Any = None
     http_headers: Dict[str, str] = field(default_factory=dict)
     http_session: HttpSession = None
+    logger: Logger = field(default=__logger__)
 
     def __iter__(self):
         yield 'url', self.url.geturl()

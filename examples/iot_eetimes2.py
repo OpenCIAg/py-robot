@@ -1,6 +1,9 @@
 import json
 from robot import Robot
 from robot.collector.shortcut import *
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 collector = get(
     const('https://iot.eetimes.com/'),
