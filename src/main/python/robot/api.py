@@ -7,13 +7,13 @@ X = TypeVar('X')
 Y = TypeVar('Y')
 
 
-class HttpEngine():
+class HttpEngine(object):
 
     def session(self) -> HttpSession:
         raise NotImplementedError()
 
 
-class HttpSession():
+class HttpSession(object):
 
     async def download(self, url: str, filename: str):
         raise NotImplementedError()
@@ -42,12 +42,6 @@ class XmlNode(Iterable['XmlNode']):
     def find_by_xpath(self, xpath: str) -> XmlNode:
         raise NotImplementedError()
 
-    def cast(self, cast_fn: Callable[[XmlNode], Y]) -> Y:
-        raise NotImplementedError()
-
-    def cast_all(self, cast_fn: Callable[[XmlNode], Y]) -> Iterable[Y]:
-        raise NotImplementedError()
-
     def as_text(self) -> str:
         raise NotImplementedError()
 
@@ -55,13 +49,13 @@ class XmlNode(Iterable['XmlNode']):
         raise NotImplementedError()
 
 
-class XmlEngine():
+class XmlEngine(object):
 
     def __call__(self, raw_xml: str) -> XmlNode:
         raise NotImplementedError()
 
 
-class Context():
+class Context(object):
     xml_engine: XmlEngine
     http_engine: HttpEngine
 
@@ -87,22 +81,16 @@ class Collector(Generic[X, Y]):
         raise NotImplementedError()
 
 
-class Robot():
+class Robot(object):
 
-    def __enter__(self):
-        return self
+    def __enter__(self) -> 'Robot':
+        raise NotImplementedError()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-    async def run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
         raise NotImplementedError()
 
-    async def run_many(self, collector: Collector[XmlNode, Y], *urls: str) -> List[Y]:
+    async def run(self, collector: Collector[None, Y]) -> Y:
         raise NotImplementedError()
 
-    def sync_run(self, collector: Collector[XmlNode, Y], url: str) -> Y:
-        raise NotImplementedError()
-
-    def sync_run_many(self, collector: Collector[XmlNode, Y], *url: str) -> List[Y]:
+    def sync_run(self, collector: Collector[None, Y]) -> Y:
         raise NotImplementedError()
