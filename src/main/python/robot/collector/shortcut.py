@@ -12,6 +12,8 @@ from robot.collector.core import ArrayCollector as array
 # noinspection PyUnresolvedReferences
 from robot.collector.core import AsyncFnCollector as afn
 # noinspection PyUnresolvedReferences
+from robot.collector.core import AsyncForeachCollector as aforeach
+# noinspection PyUnresolvedReferences
 from robot.collector.core import ConstCollector as const
 # noinspection PyUnresolvedReferences
 from robot.collector.core import DefaultCollector as default
