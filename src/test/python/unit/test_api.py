@@ -72,6 +72,9 @@ class XmlNodeTest(ApiTestCase):
             XmlNode, 'as_text',
         )
         self.check_abstract_method(
+            XmlNode, 'text',
+        )
+        self.check_abstract_method(
             XmlNode, 'attr', ('attr',)
         )
 

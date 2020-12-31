@@ -31,6 +31,15 @@ class Object(object):
     def __repr__(self):
         return f'{self.__class__.__name__}({self.__dict__})'
 
+    def __getitem__(self, item):
+        return self.__dict__.__getitem__(item)
+
+    def __setitem__(self, key, value):
+        return self.__dict__.__setitem__(key, value)
+
+    def __iter__(self):
+        return self.__dict__.__iter__()
+
 
 @dataclass()
 class ObjectCollector(Collector[X, Y]):

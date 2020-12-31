@@ -36,7 +36,10 @@ class PyQueryNodeAdapter(XmlNode):
         return PyQueryNodeAdapter(self.engine, self.engine.pyquery(self.content.root.xpath(xpath)))
 
     def as_text(self) -> str:
-        return self.content.text()
+        try:
+            return self.content.text()
+        except AttributeError:
+            return ''.join([str(it) for it in self.content])
 
     def text(self) -> Iterable[str]:
         for item in self:
@@ -45,6 +48,9 @@ class PyQueryNodeAdapter(XmlNode):
     def attr(self, attr: str) -> Iterable[str]:
         for item in self:
             yield item.content.attr(attr)
+
+    def is_emtpy(self) -> bool:
+        return len(self.content) == 0
 
     def __repr__(self):
         return f'{self.__class__.__name__}{{ {self.content} }}'

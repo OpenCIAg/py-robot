@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Callable, Iterable, Iterator, Tuple, AsyncContextManager, Dict, Any
+from typing import Iterable, Iterator, Tuple
 from typing import TypeVar, Generic
 
 X = TypeVar('X')
@@ -46,6 +46,12 @@ class XmlNode(Iterable['XmlNode']):
         raise NotImplementedError()
 
     def attr(self, attr) -> Iterable[str]:
+        raise NotImplementedError()
+
+    def is_emtpy(self) -> bool:
+        raise NotImplementedError()
+
+    def text(self) -> Iterable[str]:
         raise NotImplementedError()
 
 

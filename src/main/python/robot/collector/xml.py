@@ -36,6 +36,8 @@ class AsTextCollector(Collector[XmlNode, str]):
     logger: Logger = field(default=__logger__, compare=False)
 
     async def __call__(self, context: Context, item: XmlNode) -> Tuple[Context, str]:
+        if item.is_emtpy():
+            return context, None
         return context, self.prefix + item.as_text() + self.suffix
 
 
