@@ -4,7 +4,7 @@ import asyncio
 import logging
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable, AsyncIterable, Sequence
+from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable, AsyncIterable, Sequence, Union
 
 from robot.api import Collector, Context, X, Y
 
@@ -24,6 +24,18 @@ class PipeCollector(Collector[Any, Any]):
         for collector in self.collectors:
             context, item = await collector(context, item)
         return context, item
+
+    @classmethod
+    def from_(cls, *collector: Union[Collector, Sequence[Union]]) -> Collector:
+        if len(collector) == 0:
+            raise Exception()
+        if len(collector) > 1:
+            return cls(*collector)
+        collector = collector[0]
+        if isinstance(collector, (tuple, list,)):
+            return cls(*collector)
+        else:
+            return collector
 
 
 @dataclass(init=False)
@@ -95,10 +107,14 @@ class ConstCollector(Collector[Any, Y]):
         return context, self.value
 
 
-@dataclass()
+@dataclass(init=False)
 class ForeachCollector(Collector[Sequence[X], Sequence[Y]]):
     collector: Collector[X, Y]
     logger: Logger = field(default=__logger__, compare=False)
+
+    def __init__(self, *collector: Collector[X, Y], logger: Logger = __logger__):
+        self.collector = PipeCollector.from_(collector)
+        self.logger = logger
 
     async def __call__(self, context: Context, item: Sequence[X]) -> Tuple[Context, Sequence[Y]]:
         collected_items = await asyncio.gather(*[
@@ -107,10 +123,14 @@ class ForeachCollector(Collector[Sequence[X], Sequence[Y]]):
         return context, list(map(lambda it: it[1], collected_items))
 
 
-@dataclass()
+@dataclass(init=False)
 class AsyncForeachCollector(Collector[AsyncIterable[X], Sequence[Y]]):
-    collector: Collector[X, Y]
+    collector: Union[Collector[X, Y], Sequence[Collector]]
     logger: Logger = field(default=__logger__, compare=False)
+
+    def __init__(self, *collector: Collector[X, Y], logger: Logger = __logger__):
+        self.collector = PipeCollector.from_(collector)
+        self.logger = logger
 
     async def __call__(self, context: Context, item: AsyncIterable[X]) -> Tuple[Context, Sequence[Y]]:
         tasks = []
@@ -151,7 +171,7 @@ class DelayCollector(Collector[X, X]):
 
 @dataclass()
 class DictCollector(Collector[X, Dict[str, Any]]):
-    nested_collectors: Tuple[Collector[X, Dict[str, Any]]] = ()
+    nested_collectors: Sequence[Collector[X, Dict[str, Any]]] = ()
     field_collectors: Dict[str, Collector[X, Any]] = field(default_factory=dict)
     logger: Logger = field(default=__logger__, compare=False)
 
@@ -188,9 +208,12 @@ CONTEXT = ContextCollector()
 
 @dataclass()
 class TapCollector(Collector[X, X]):
-    fn: Collector[X, Any]
+    collector: Collector[X, Any]
     logger: Logger = field(default=__logger__, compare=False)
 
+    def __post_init__(self):
+        self.collector = PipeCollector.from_(self.collector)
+
     async def __call__(self, context: Context, item: X) -> Tuple[Context, X]:
-        await self.fn(context, item)
+        await self.collector(context, item)
         return context, item
