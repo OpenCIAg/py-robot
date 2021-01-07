@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup, find_packages
 
-__version__ = '0.3.devSNAPSHOT' 
+__version__ = '0.4.devSNAPSHOT' 
 
 
 def read(file_name):
