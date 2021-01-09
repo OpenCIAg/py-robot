@@ -43,6 +43,8 @@ class SuppressCollector(Collector[X, Y]):
             return await self.collector(context, item)
         except Exception as ex:
             if isinstance(ex, self.error_type):
+                self.logger.debug(f'suppressing exception {ex.__class__.__name__}: {ex}', exc_info=ex)
                 return await self.handler(context, (ex, item,))
             else:
+                self.logger.info(f'exception was not suppressed {ex.__class__.__name__}: {ex}', exc_info=ex)
                 raise ex
