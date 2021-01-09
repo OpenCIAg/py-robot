@@ -26,3 +26,16 @@ class DictCsvCollectorTest(AsyncTestCase):
             read_content = input_stream.read()
             self.assertEqual(content, read_content)
         file.close()
+
+    async def test_empty(self):
+        file = NamedTemporaryFile()
+        collector = dict_csv(
+            const(file.name)
+        )
+        _, result = await collector(None, [])
+        self.assertEqual(file.name, result)
+        with open(file.name) as input_stream:
+            read_content = input_stream.read()
+            self.assertEqual('', read_content)
+        file.close()
+

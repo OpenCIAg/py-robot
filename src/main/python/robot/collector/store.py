@@ -52,7 +52,10 @@ class DictCsvCollector(Collector[Sequence[Dict[str, Any]], str]):
         fields = self.fields
         with open(filename, self.mode) as output:
             iterable = iter(item)
-            first_item = next(iterable)
+            try:
+                first_item = next(iterable)
+            except StopIteration:
+                return context, filename
             if fields is None:
                 fields = sorted(first_item.keys())
             csv_writer = self.csv_writer_factory(output, fields)
