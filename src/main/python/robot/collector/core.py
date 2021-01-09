@@ -110,16 +110,22 @@ class ConstCollector(Collector[Any, Y]):
 @dataclass(init=False)
 class ForeachCollector(Collector[Sequence[X], Sequence[Y]]):
     collector: Collector[X, Y]
+    limit: int = None
     logger: Logger = field(default=__logger__, compare=False)
 
-    def __init__(self, *collector: Collector[X, Y], logger: Logger = __logger__):
+    def __init__(self, *collector: Collector[X, Y], limit: int = None, logger: Logger = __logger__):
         self.collector = PipeCollector.from_(collector)
+        self.limit = limit
         self.logger = logger
 
     async def __call__(self, context: Context, item: Sequence[X]) -> Tuple[Context, Sequence[Y]]:
-        collected_items = await asyncio.gather(*[
-            self.collector(context, i) for i in item
-        ])
+        all_items = list(i for i in item)
+        batch_size = len(all_items) if self.limit is None else self.limit
+        collected_items = []
+        for batch in [all_items[index:index + batch_size] for index in range(0, len(all_items), batch_size)]:
+            collected_items = await asyncio.gather(*[
+                self.collector(context, i) for i in batch
+            ])
         return context, list(map(lambda it: it[1], collected_items))
 
 
