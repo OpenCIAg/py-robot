@@ -27,6 +27,7 @@ from robot.collector.core import PipeCollector as pipe
 # noinspection PyUnresolvedReferences
 from robot.collector.core import TapCollector as tap
 # noinspection PyUnresolvedReferences
+from robot.collector.core import Throw as throw
 # noinspection PyUnresolvedReferences
 from robot.collector.core import TupleCollector as tuple
 # noinspection PyUnresolvedReferences

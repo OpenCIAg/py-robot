@@ -225,3 +225,12 @@ class TapCollector(Collector[X, X]):
     async def __call__(self, context: Context, item: X) -> Tuple[Context, X]:
         await self.collector(context, item)
         return context, item
+
+
+@dataclass()
+class Throw(Collector[Any, Any]):
+    factory: Callable[[], Exception] = Exception
+    logger: Logger = field(default=__logger__, compare=False)
+
+    async def __call__(self, context: Context, item: Any) -> Tuple[Context, Any]:
+        raise self.factory()
