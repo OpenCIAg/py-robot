@@ -70,3 +70,17 @@ class ForeachCollectorTest(AsyncTestCase):
         expected = ['1', '2', '3', '4']
         _, result = await collector(None, html)
         self.assertEqual(expected, list(result))
+
+    async def test_limit_with_empty_items(self):
+        xml_engine = PyQueryAdapter()
+        collector = pipe(
+            const([]),
+            foreach(
+                as_text(),
+                limit=None,
+            ),
+        )
+        html = xml_engine(raw_html)
+        expected = []
+        _, result = await collector(None, html)
+        self.assertEqual(expected, list(result))
