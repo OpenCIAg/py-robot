@@ -123,9 +123,10 @@ class ForeachCollector(Collector[Sequence[X], Sequence[Y]]):
         batch_size = len(all_items) if self.limit is None else self.limit
         collected_items = []
         for batch in [all_items[index:index + batch_size] for index in range(0, len(all_items), batch_size)]:
-            collected_items = await asyncio.gather(*[
+            batch_collected_items = await asyncio.gather(*[
                 self.collector(context, i) for i in batch
             ])
+            collected_items += batch_collected_items
         return context, list(map(lambda it: it[1], collected_items))
 
 

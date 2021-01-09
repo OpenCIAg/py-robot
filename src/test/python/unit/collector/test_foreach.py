@@ -56,3 +56,17 @@ class ForeachCollectorTest(AsyncTestCase):
         expected = ['2', '4']
         _, result = await collector(None, html)
         self.assertEqual(expected, list(result))
+
+    async def test_limit(self):
+        xml_engine = PyQueryAdapter()
+        collector = pipe(
+            css('tr td'),
+            foreach(
+                as_text(),
+                limit=1,
+            ),
+        )
+        html = xml_engine(raw_html)
+        expected = ['1', '2', '3', '4']
+        _, result = await collector(None, html)
+        self.assertEqual(expected, list(result))
