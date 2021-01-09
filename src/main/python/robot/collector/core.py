@@ -4,7 +4,7 @@ import asyncio
 import logging
 from dataclasses import dataclass, field
 from logging import Logger
-from typing import List, Any, Callable, Iterable, Dict, Tuple, Awaitable, AsyncIterable, Sequence, Union
+from typing import Any, Callable, Iterable, Dict, Tuple, Awaitable, AsyncIterable, Sequence, Union
 
 from robot.api import Collector, Context, X, Y
 
@@ -105,6 +105,9 @@ class ConstCollector(Collector[Any, Y]):
 
     async def __call__(self, context: Context, item: Any) -> Tuple[Context, Y]:
         return context, self.value
+
+
+NONE_COLLECTOR = ConstCollector(None)
 
 
 @dataclass(init=False)
@@ -225,12 +228,3 @@ class TapCollector(Collector[X, X]):
     async def __call__(self, context: Context, item: X) -> Tuple[Context, X]:
         await self.collector(context, item)
         return context, item
-
-
-@dataclass()
-class Throw(Collector[Any, Any]):
-    factory: Callable[[], Exception] = Exception
-    logger: Logger = field(default=__logger__, compare=False)
-
-    async def __call__(self, context: Context, item: Any) -> Tuple[Context, Any]:
-        raise self.factory()

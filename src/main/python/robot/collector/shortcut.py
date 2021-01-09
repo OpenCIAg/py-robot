@@ -23,15 +23,19 @@ from robot.collector.core import FnCollector as fn
 # noinspection PyUnresolvedReferences
 from robot.collector.core import ForeachCollector as foreach
 # noinspection PyUnresolvedReferences
+from robot.collector.core import NONE_COLLECTOR as none
+# noinspection PyUnresolvedReferences
 from robot.collector.core import PipeCollector as pipe
 # noinspection PyUnresolvedReferences
 from robot.collector.core import TapCollector as tap
 # noinspection PyUnresolvedReferences
-from robot.collector.core import Throw as throw
-# noinspection PyUnresolvedReferences
 from robot.collector.core import TupleCollector as tuple
 # noinspection PyUnresolvedReferences
 from robot.collector.css import CssCollector as css
+# noinspection PyUnresolvedReferences
+from robot.collector.error import SuppressCollector as suppress
+# noinspection PyUnresolvedReferences
+from robot.collector.error import ThrowCollector as throw
 # noinspection PyUnresolvedReferences
 from robot.collector.http import GetCollector as get, \
     UrlCollector as url
